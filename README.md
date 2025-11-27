@@ -10,9 +10,15 @@
 
 ---
 
+**AI Disclaimer:** This proposal was written by me. I used AI assistance to refactor the content for clarity, formatting, and improved wording. All game design decisions, architecture choices, and content are my own.
+
+**Note for Teacher:** Before you read this, I recognize this proposal might seem like a lot, but I am convinced I can get it done and it will all work nicely. I am heavily leaning towards removing the stat system entirely (essence upgrades), but I wanted to leave it here to let you confirm whether you think it's necessary or if I should simplify further.
+
+---
+
 # Game Proposal – Echoes of the Fallen Star
 
-## ✒️ Description
+## Description
 
 **Working Title:** Echoes of the Fallen Star
 
@@ -34,24 +40,26 @@ Simple, focused, and doable.
 
 For this course, I will implement a compact first chapter of this game:
 
--   Few combat zones (Temple entrance, corridors, boss chambers)
+-   Few combat zones(5 lets say but considering procedurally just having a lot, ill design 5 but will seem like a lot) (Temple entrance, corridors, boss chambers,etc)
 -   1 boss (Temple Guardian final boss)
 -   3–4 enemy types (Shadow Bat swarms, Spirit Boxer enforcers, Temple Guardian boss)
 -   Simple progression: Essences → Upgrade ATK or HP
+-   Story cutscenes: Static background images with text dialogue panels (intro cutscene explaining the backstory, mid-game story moments, and victory cutscene after defeating the Temple Guardian)
 
 **Nice to have plans (not in unless you think my project is too small):**
 
--   Multi-zone progression
 -   Inventory/equipment systems
 -   Complex stat allocation
 -   XP/leveling/gold/shop systems
 -   More enemy types and deeper story
 
-## 🕹️ Gameplay
+## Gameplay
 
 The player controls the Shadow Creature (their corrupted spirit form) using keyboard input (WASD for movement, Space for attacking). The Shadow Creature floats instead of walking . Players explore temple zones, encountering various enemies that spawn and chase. Combat is real-time and action-oriented, with the player able to perform basic attacks and dodge.
 
 As enemies are defeated, they drop:
+
+Note on Essence Drops: Currently planned for enemies to drop essences on death, but this mechanic is under consideration and may be taken out if you think this is too much.
 
 -   **Essences** – consumed to permanently increase ATK or HP
 
@@ -63,12 +71,61 @@ Combat involves:
 -   Dodge (quick sidestep) for invincibility frames
 -   Enemy AI that patrols, chases, and attacks
 -   Boss fights with telegraphed attacks and multiple phases
+-   Death animations: All characters (player and enemies) have death animations that play when HP reaches 0, providing visual feedback before transitioning to game over or removal
 
-The game is played with keyboard controls. Players can pause the game at any time, and the game auto-saves when returning to the hub or defeating bosses.
+The game is played with keyboard controls. Players can pause the game at any time (ESC key) to access the pause menu.
+
+**Juice & Polish:**
+
+Juice effects to enhance player feedback:
+
+-   **Particle Effects**: Dark particles on enemy death, glowing particles when collecting essences, spark effects on attack impacts
+-   **Screen Shake**: Camera shake on boss attacks, heavy damage, and enemy death explosions
+-   **Visual Feedback**: Flashing red on damage, invincibility flicker (sprite alpha tween), hit stun animations
+-   **Stagger/Knockback**: Enemy knockback animations when hit, player knockback on heavy damage
+-   **Smooth Transitions**: Tweens for direction changes, UI fade-ins, map transitions, and camera movements
+
+These effects use the `Timer.js` library's `tween()` method to interpolate values over time, creating smooth, satisfying animations that make combat feel impactful and responsive.
+
+**Temple Guardian Boss Fight - Maximum Juice:**
+
+The final boss fight against the Temple Guardian is going to be the most polished and impactful encounter in the game, with extensive juice effects:
+
+-   **Special Attack Telegraphed Animation**: The Temple Guardian raises his sword above his head, which begins to glow with increasing intensity. This visual telegraph gives players time to react and dodge.
+-   **Screen Shake on Special Attack**: Heavy camera shake when the special attack lands or when the sword strikes the ground, emphasizing the power of the attack.
+-   **Screen Shake on Heavy Hits**: Camera shake when the player takes significant damage or when the boss is hit with powerful attacks.
+-   **Particle Effects**:
+    -   Glowing energy particles around the sword during special attack charge
+    -   Explosive particle burst on special attack impact
+    -   Dark shadow particles when the boss takes damage
+    -   Dramatic particle effects on boss death
+-   **Visual Feedback**:
+    -   Screen flash/color overlay when special attack hits
+    -   Boss stagger animation when taking heavy damage
+    -   Glowing aura effects during phase transitions
+-   **Audio Emphasis**: Special attack charge sound builds in intensity, impact sound is powerful and satisfying
+-   **Phase Transitions**: Smooth visual transitions between boss phases with screen effects and particle bursts
+
+This boss fight serves as the culmination of the game, so it receives the most attention to detail and polish. The goal is to make every attack feel impactful and every dodge feel rewarding.
+
+**Note on Essence Drops**: Currently planned for enemies to drop essences on death, but this mechanic is under consideration and may be taken out if you think this is too much.
+
+**Save System:**
+
+-   **Manual Save:** Players can save their game at any time via the pause menu (ESC → Save Game). This saves the complete game state including:
+    -   Player position and current map
+    -   Player HP and ATK stats
+    -   Collected essences count
+    -   Map progress and defeated enemies
+    -   Current game state (allows resuming exactly where you left off)
+-   **Auto-Save:** The game automatically saves when defeating bosses
+-   **Continue:** The "Continue" option on the title screen loads the last saved game state, allowing players to close the browser tab and resume exactly where they saved
 
 **Story & Cutscenes:**
 
-The game features story cutscenes that deliver the narrative between gameplay segments. Cutscenes use:
+_Note: Cutscenes are an extra feature and not fully necessary for the core game, but I'm including them because I can use tweening to create smooth transitions between screens, and it's a nice feature that won't take too much time to implement._
+
+The game features story cutscenes that deliver the narrative between gameplay segments. Cutscenes are simple static pages with text - no animation or complex sequences. They use:
 
 -   Static background images (full screen) to set the scene
 -   Text panel at the bottom displaying dialogue
@@ -97,28 +154,128 @@ Cutscenes appear at:
 
 This approach allows all enemies to feel responsive and face the player appropriately while working within the sprite limitations.
 
-## 📃 Requirements (Rough Draft)
+## Requirements
 
-### Core Systems
+### State Machines
 
--   State machine architecture for game states and entity behaviors
--   Entity system with inheritance hierarchy (GameObject → Entity → Player/Enemy/etc.)
--   Collision detection for player, enemies, pickups, and environment
--   Save/load system using localStorage
--   Win/loss conditions and scoring system
+-   **Global State Machine**: Manages game flow (TitleScreen, Instructions, Cutscene, Play, Pause, Upgrade, GameOver, Victory)
+-   **Entity State Machines**: Player and Enemy entities each have their own state machines
+    -   Player: IDLE, MOVING, ATTACKING, DODGING, HIT, DYING
+    -   Enemies: IDLE, PATROL, CHASE, ATTACK, HIT, DYING (with variations per enemy type)
 
-### Game Entities
+### Inheritance & Polymorphism
 
--   Player character with movement, attack, and dodge mechanics
--   Multiple enemy types with AI behaviors
--   Essence pickups
--   Environmental objects and obstacles
+-   **Inheritance Hierarchy**: GameObject → Entity → Player/Enemy → Enemy subclasses (ShadowBat, SpiritBoxer, TempleGuardian)
+-   **Polymorphism**: CollisionManager uses Collidable interface to polymorphically check collisions across Entity, EssencePickup, and EnvironmentalObject types
+-   **Entity Arrays**: Polymorphic iteration through Entity arrays for updates and rendering
 
-### Visuals & Audio
+### Factory Design Pattern
 
--   Sprite-based graphics with animations
--   Background music and sound effects
--   UI elements and HUD
+-   **EnemyFactory**: Centralizes enemy creation logic with methods for each enemy type (createShadowBat, createSpiritBoxer, createTempleGuardian)
+-   Uses EnemyType enum to determine which enemy to create
+
+### Enums
+
+-   **Direction**: 8-directional movement (N, NE, E, SE, S, SW, W, NW)
+-   **PlayerState**: Player state machine states
+-   **EntityState**: Enemy state machine states
+-   **GameStateName**: Global game states
+-   **EnemyType**: Enemy types for factory pattern
+-   All magic numbers and strings eliminated through enum usage
+
+### Game Entities & Game Objects
+
+-   **Entities**: Player, Enemy (ShadowBat, SpiritBoxer, TempleGuardian) - intelligent objects with AI, state machines, and behaviors
+-   **Game Objects**: EssencePickup (collectible), EnvironmentalObject (static obstacles) - simpler objects that entities interact with
+
+### Collision Detection & Hitboxes
+
+-   **Tile-based Collision**: Tiled map collision layer for player movement and environment boundaries
+-   **Entity Collision**: Player vs Enemy attacks, Enemy vs Player attacks, Entity vs Pickup collection
+-   **Hitbox System**: Uses Hitbox library class which implements AABB (Axis-Aligned Bounding Box) collision detection - the Hitbox class wraps the `isAABBCollision` function from CollisionHelpers.js, providing a clean object-oriented interface for collision detection between entities
+
+### Persistence
+
+-   **Full Game State Saving**: SaveManager saves complete game state to localStorage including:
+    -   Player position, HP, ATK, essence count
+    -   Current map and map progress
+    -   Enemy states (defeated/spawned)
+    -   Pickup states (collected essences)
+    -   Game flags (bosses defeated, cutscenes viewed)
+-   **Manual Save**: Available anytime via pause menu
+-   **Auto-Save**: Triggers when defeating bosses
+
+### Win & Loss Conditions
+
+-   **Win Condition**: Defeat Temple Guardian (final boss) → VictoryState → Victory cutscene
+-   **Loss Condition**: Player HP <= 0 → Death animation → GameOverState
+
+### Score/Points/Prizes
+
+-   **Essence System**: Collect essences from defeated enemies
+-   **Upgrade System**: Use essences to permanently upgrade ATK or HP
+-   **Progression**: Simple, focused progression system (essences → upgrades)
+
+### Sprites
+
+-   All visual elements use sprite-based graphics (no colored canvas shapes)
+-   Player: Shadow Creature with 8-directional sprites
+-   Enemies: Shadow Bat, Spirit Boxer, Temple Guardian with multiple animation sprites
+-   Environment: Terrain tiles, temple structures
+-   UI: HP bar, buttons, upgrade interface
+-   All sprite sources properly credited
+
+### Animations
+
+-   **Animation System**: Uses Animation.js library class for sprite sheet animations
+-   **Player Animations**: Idle (8 directions), attack, dodge, death
+-   **Enemy Animations**: Idle, walk/run/fly, attack chains, hit/damaged, death
+-   **Death Animations**: All characters have dedicated death animations
+-   **Hit Animations**: Some characters have hit/damaged animations for visual feedback
+
+### Tweens
+
+-   **Direction Tweening**: Smooth player rotation through intermediate directions
+-   **Map Transitions**: Fade out/in and camera pan tweens when transitioning between maps
+-   **UI Transitions**: Menu fade-ins, button hover effects
+-   **Combat Tweens**: Knockback animations, camera shake
+-   Uses Timer.js library's `tween()` method for all interpolations
+
+### Sounds & Music
+
+-   **Background Music**: Ambient tracks for title screen, gameplay zones, and boss fights
+-   **Sound Effects**: Player attack, enemy hit/death, player hurt, essence pickup, menu interactions, dodge, boss attack telegraphs
+-   All sound sources properly credited
+
+### Fonts
+
+-   **Title Font**: Stylized font for game title and major headings (e.g., Orbitron, Exo 2)
+-   **Body Font**: Clean, readable font for HUD, menus, and dialogue (e.g., Roboto, Inter)
+-   Different fonts used for different parts of the game
+-   All font sources properly credited
+
+### Instructions
+
+-   **InstructionsState**: Dedicated state accessible from title screen showing:
+    -   Controls (WASD movement, Space attack, Dodge key)
+    -   Gameplay mechanics (essence collection, upgrades)
+    -   Objectives (defeat Temple Guardian)
+
+### Juice
+
+-   **Particle Effects**: Enemy death particles, essence collection particles, attack impact sparks
+-   **Screen Shake**: Camera shake on boss attacks, heavy damage, enemy death explosions
+-   **Visual Feedback**: Damage flash, invincibility flicker, hit stun animations
+-   **Stagger/Knockback**: Enemy and player knockback animations
+-   **Smooth Transitions**: Direction tweens, UI fades, map transitions
+-   **Boss Fight Polish**: Maximum juice effects for Temple Guardian fight (special attack telegraphs, screen shake, particle bursts)
+
+### 📊 User Interface
+
+-   **HUD Elements**: Player HP bar (top-left), essence count, current stats
+-   **Menus**: Title screen, pause menu, upgrade interface
+-   **Cutscenes**: Text panel UI for dialogue
+-   All UI elements clearly display core game information
 
 ### 🤖 State Diagrams
 
@@ -261,22 +418,81 @@ The **Temple Guardian** (boss) uses the most complex state machine with multiple
 
 ![Class Diagram](./assets/images/ClassDiagram.png)
 
-The class diagram illustrates the inheritance hierarchy: GameObject (base) → Entity (adds health, hitbox, movement) → Player/Enemy/Pickup/Projectile/EnvironmentalObject. The EnemyFactory pattern is shown, along with the StateMachine and Animation systems.
+The class diagram illustrates the complete architecture of "Echoes of the Fallen Star" and demonstrates all rubric requirements for object-oriented design.
+
+#### Inheritance Hierarchy
+
+**Base Classes:**
+
+-   **GameObject**: Abstract base class providing position (`x`, `y`), dimensions (`width`, `height`), and core methods (`update()`, `render()`)
+-   **Entity extends GameObject**: Adds health system (`hp`, `maxHp`), collision detection (`Hitbox`), state management (`EntityStateMachine`), animation (`Animation`, `Sprite`), and movement (`speed`, `direction`)
+-   **Player extends Entity**: Player-specific mechanics including attack damage/range, dodge mechanics, invincibility frames, and essence collection
+-   **Enemy extends Entity**: Base enemy class with AI behaviors (detection range, patrol paths, target tracking, chase/patrol/attack methods)
+    -   **ShadowBat extends Enemy**: Fast swarm enemy with flying behavior
+    -   **SpiritBoxer extends Enemy**: Combo-based fighter with charge dash
+    -   **TempleGuardian extends Enemy**: Boss enemy with multiple attack types and phase-based behavior
+
+**Game Objects:**
+
+-   **EssencePickup extends GameObject**: Collectible items dropped by enemies
+-   **EnvironmentalObject extends GameObject**: Static objects (rocks, walls) providing collision boundaries
+
+#### Design Patterns
+
+**Factory Pattern (🏭 1 point):**
+
+-   **EnemyFactory**: Centralizes enemy creation logic with methods `createShadowBat()`, `createSpiritBoxer()`, `createTempleGuardian()`. Uses `EnemyType` enum to determine which enemy to create.
+
+**State Machine Pattern (🤖 2 points):**
+
+-   **StateMachine**: Base state machine for global game states
+-   **EntityStateMachine extends StateMachine**: Entity-specific state machines managing Player and Enemy states (IDLE, MOVING, ATTACKING, etc.)
+
+**Polymorphism (🧱 4 points):**
+
+-   **Collidable interface**: Implemented by `Entity`, `EssencePickup`, and `EnvironmentalObject`, allowing `CollisionManager` to polymorphically check collisions using `isCollidingWith()` and `getCollisionBounds()`
+-   **Entity array**: `CollisionManager` maintains arrays of `Entity` references, allowing polymorphic iteration through Player and Enemy subclasses
+
+#### System Classes
+
+-   **Map & MapManager**: Handles Tiled map loading, rendering, and transitions between zones
+-   **CollisionManager**: Centralized collision detection system checking entity vs entity, entity vs pickup, and entity vs environment
+-   **SaveManager**: Persistence system using localStorage to save/load complete game state
+-   **Input**: Keyboard input handling with `isKeyPressed()` and `isKeyHeld()` methods
+-   **Camera**: Follows player and manages viewport transformations
+-   **Sprite & Animation**: Sprite sheet frame extraction and animation cycling
+
+#### Enums (🔢 1 point)
+
+All magic numbers and strings are eliminated using enums:
+
+-   **Direction**: 8-directional movement (N, NE, E, SE, S, SW, W, NW)
+-   **PlayerState**: Player state machine states (IDLE, MOVING, ATTACKING, DODGING, HIT, DYING)
+-   **EntityState**: Enemy state machine states (IDLE, PATROL, CHASE, ATTACK, HIT, DYING)
+-   **GameStateName**: Global game states (TitleScreen, Instructions, Play, Pause, Upgrade, Cutscene, GameOver, Victory)
+-   **EnemyType**: Enemy types for factory pattern (ShadowBat, SpiritBoxer, TempleGuardian)
+
+#### Key Relationships
+
+-   **Inheritance**: GameObject → Entity → Player/Enemy → Enemy subclasses
+-   **Composition**: Entity contains Animation, Sprite, EntityStateMachine, Hitbox
+-   **Association**: Enemy targets Player, Camera follows Entity, CollisionManager manages arrays of collidable objects
+-   **Factory**: EnemyFactory creates Enemy instances based on EnemyType enum
 
 ### 🧵 Wireframes
 
 > [!note]
 > Your wireframes don't have to be super polished. They can even be black/white and hand drawn. I'm just looking for a rough idea about what you're visualizing.
 
-![Main Menu](./assets/images/Main-Menu.png)
+**Main Menu:**
 
 -   _New Game_ will start a fresh playthrough, resetting all progress.
 -   _Continue_ will load the saved game state from localStorage.
 -   _Best Echo Score_ will be displayed prominently on the title screen.
 
-The title screen will feature the game's title in a stylized sci-fi font, with a dark, atmospheric background suggesting the alien planet setting.
+The title screen will feature the game's title in a stylized font, with a dark, atmospheric background suggesting the dark fantasy setting.
 
-![Game Board](./assets/images/Game-Board.png)
+**Gameplay Screen:**
 
 The gameplay screen will feature:
 
@@ -313,6 +529,10 @@ Sprites will be created or sourced for:
 -   Cutscenes: static background images for story scenes, text panel UI for dialogue
 
 **Note:** The Shadow Creature (player) is the only sprite with full 8-directional support. Other enemies use sprite flipping and angle-based facing to work in a top-down view.
+
+**Death Animations:** All characters (player and all enemy types) have dedicated death animations that play when HP reaches 0. The player's death animation triggers the GameOverState, while enemy death animations play before the enemy is removed from the game and may drop essence pickups.
+
+**Hit/Damage Animations:** Some characters also have dedicated animations that play when taking damage (before death). Shadow Bat and Temple Guardian have "hit" animations, while Spirit Boxer has a "damaged" animation. These animations provide visual feedback when characters are struck, showing brief stun or recoil effects before returning to their normal state.
 
 #### 👥 Character Design & Lore
 
