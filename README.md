@@ -18,111 +18,244 @@
 
 **Platform:** HTML5 Canvas (provided engine / framework)
 
-**Genre:** Top-down action RPG / "MMO-style grinder" with eerie exploration and character builds.
+**Genre:** Top-down action RPG with dark fantasy themes and character progression.
 
 **Core fantasy:**
 
-The player is a lone survivor who crash-lands on a mysterious alien planet. By fighting creatures, collecting loot, and absorbing monster essences, they grow stronger and shape their build (Strength/Dexterity/Insight/Affinity). The planet's sentient "Echo" watches and reacts. The long-term goal is to progress through increasingly dangerous zones, defeat the Echo at the planet's core, and "finish a run" with a chosen playstyle.
+You were once a legendary warrior. During your final battle, you were struck by a forbidden ritual that ripped your spirit from your body. Your soul didn't pass on - it mutated into a Shadow Form, a drifting, broken, half-forgotten being. Your goal: reclaim your humanity by defeating the guardians who were once your allies, now corrupted by the same ritual that stole your body.
 
 **Core loop:**
 
-Explore a zone → Fight enemies → Gain XP + loot + essences → Upgrade stats, gear, skills → Unlock the next area → Eventually fight the final boss.
+Explore zones → Fight enemies → Collect essences → Use essences to upgrade ATK or HP → Fight stronger enemies → Defeat corrupted guardians → Eventually defeat everyone
 
-This lets me build a highly replayable grinder while still integrating story, builds, and a clear win condition.
+Simple, focused, and doable.
 
 **Scope for this project (v1):**
 
 For this course, I will implement a compact first chapter of this game:
 
--   1 main combat zone (Crash Site) + 1 small hub area
--   1 mini-boss + 1 final boss for this "chapter"
--   3–4 enemy types
--   A small set of weapons/armor/essences (not a full loot system)
--   A simple skill/talent system (a few nodes, not full trees)
+-   Few combat zones (Temple entrance, corridors, boss chambers)
+-   1 boss (Temple Guardian final boss)
+-   3–4 enemy types (Shadow Bat swarms, Spirit Boxer enforcers, Temple Guardian boss)
+-   Simple progression: Essences → Upgrade ATK or HP
 
-Future zones, more enemies, deeper story, and New Game+ are planned as extensions, not required for this project.
+**Nice to have plans (not in unless you think my project is too small):**
+
+-   Multi-zone progression
+-   Inventory/equipment systems
+-   Complex stat allocation
+-   XP/leveling/gold/shop systems
+-   More enemy types and deeper story
 
 ## 🕹️ Gameplay
 
-The player controls their character using keyboard input (WASD for movement, mouse for aiming/attacking). They explore the Crash Site zone, encountering various enemies that spawn and chase the player. Combat is real-time and action-oriented, with the player able to perform basic attacks, dodge rolls, and eventually unlock abilities.
+The player controls the Shadow Creature (their corrupted spirit form) using keyboard input (WASD for movement, Space for attacking). The Shadow Creature floats instead of walking . Players explore temple zones, encountering various enemies that spawn and chase. Combat is real-time and action-oriented, with the player able to perform basic attacks and dodge.
 
 As enemies are defeated, they drop:
 
--   **Gold** – currency for upgrades
--   **Essences** – consumed to permanently increase stats
--   **Equipment** – weapons, armor, and trinkets that modify combat effectiveness
+-   **Essences** – consumed to permanently increase ATK or HP
 
-The player can return to the hub area to:
-
--   Upgrade stats using essences
--   Purchase/equip new gear
--   Save progress
--   Access the next zone (once unlocked)
-
-The game features a progression system where defeating enemies grants XP, and leveling up allows the player to allocate points to Strength, Dexterity, Insight, or Vitality. Different builds (e.g., high Strength for melee, high Dexterity for ranged/crit builds) create varied playstyles.
+The progression system is simple: collect essences from defeated enemies, then use them to upgrade either your Attack or Health. That's it. No XP, no leveling, no gold, no shops, no equipment. Just essences → upgrade ATK or HP.
 
 Combat involves:
 
--   Melee or ranged attacks (depending on equipped weapon)
--   Dodge rolling for invincibility frames
+-   Melee attacks
+-   Dodge (quick sidestep) for invincibility frames
 -   Enemy AI that patrols, chases, and attacks
 -   Boss fights with telegraphed attacks and multiple phases
 
-The game is played with keyboard and mouse controls. Players can pause the game at any time, and the game auto-saves when returning to the hub or defeating bosses.
+The game is played with keyboard controls. Players can pause the game at any time, and the game auto-saves when returning to the hub or defeating bosses.
 
-## 📃 Requirements
+**Story & Cutscenes:**
 
-### 1. High-Level Architecture & Design Patterns
+The game features story cutscenes that deliver the narrative between gameplay segments. Cutscenes use:
 
-1. The system shall use a global state machine for game states (TitleScreen, Play, Pause, GameOver, Victory).
-2. The system shall use per-entity state machines for enemies (IDLE, PATROL, CHASE, ATTACK, DYING) and player (NORMAL, ATTACKING, ROLLING).
-3. The system shall implement an inheritance hierarchy: GameObject → Entity → Player/Enemy/Pickup/Projectile.
-4. The system shall use polymorphism in the main game loop to update and render all entities.
-5. The system shall use an EnemyFactory to spawn enemies based on type and level parameters.
-6. The system shall use enums for GameStateName, EnemyType, Rarity, Direction, DamageType, and StatType (no magic numbers/strings).
+-   Static background images (full screen) to set the scene
+-   Text panel at the bottom displaying dialogue
+-   Character names (optional) and dialogue text
+-   Space/Enter to advance dialogue
+-   ESC to skip (optional)
 
-### 2. Game Entities & Collision
+Cutscenes appear at:
 
-7. The system shall implement Player, Enemy (with subtypes), Pickup, Projectile, and EnvironmentalObject entities.
-8. The system shall detect collision between player and environment (walls, obstacles).
-9. The system shall detect collision between player and enemies (contact damage, attack hitboxes).
-10. The system shall detect collision between player and pickups (auto-collection).
-11. The system shall detect collision between player attacks and enemies (damage application).
-12. The system shall detect collision between projectiles and enemies/environment (impact handling).
+-   Game start (intro cutscene explaining the backstory)
+-   Mid-game story moments (when reaching key locations or defeating certain enemies)
+-   Victory (ending cutscene after defeating the final boss)
 
-### 3. Persistence
+### Direction Handling for Enemies
 
-13. The system shall save player data (level, XP, stats, HP, equipped items) to localStorage.
-14. The system shall save game progress (boss defeat flags, zone unlocks) to localStorage.
-15. The system shall auto-save when returning to hub or defeating bosses.
-16. The system shall provide "New Game" and "Continue" options on the title screen.
-17. The system shall load saved state when selecting "Continue".
+**Player (Shadow Creature):** Has full 8-directional sprites (N, NE, E, SE, S, SW, W, NW) - perfect for top-down gameplay.
 
-### 4. Win/Loss Conditions & Scoring
+**Enemies without 8 directions:**
 
-18. The system shall transition to GameOverState when player HP reaches 0.
-19. The system shall display stats summary (time survived, enemies defeated, Echo Score) in GameOverState.
-20. The system shall transition to VictoryState when the Core Echo boss is defeated.
-21. The system shall track Echo Score based on enemies killed, bosses defeated, and rare items obtained.
-22. The system shall save and display best Echo Score on the title screen.
+-   **Temple Guardian & Spirit Boxer:** These enemies use sprite flipping (horizontal mirror) to face left/right. They automatically face the player's direction using angle calculation:
+    -   Calculate angle from enemy to player
+    -   If angle is in left half (180° to 360°), flip sprite horizontally
+    -   If angle is in right half (0° to 180°), use normal sprite
+    -   This creates the illusion of facing the player without needing 8-directional sprites
+-   **Shadow Bat:** As a flying enemy, it doesn't need directional sprites. The bat animations work from any angle, and the sprite can be rotated slightly to face movement direction if needed.
 
-### 5. Visuals & Audio
+This approach allows all enemies to feel responsive and face the player appropriately while working within the sprite limitations.
 
-23. The system shall use sprite sheets for player, enemies, pickups, and environment.
-24. The system shall implement animations using Animation.js for player (idle, walk, attack, roll) and enemies (idle, move, attack, death).
-25. The system shall use tweens for screen transitions, camera shake, HP bar interpolation, and floating damage numbers.
-26. The system shall include background music for Title/Hub, Crash Site zone, and boss fight.
-27. The system shall include sound effects for player attack, enemy hit/death, player hurt, pickup collection, and menu interactions.
-28. The system shall use at least two fonts: a stylized sci-fi font for titles and a clean readable font for HUD/menus.
+## 📃 Requirements (Rough Draft)
 
-### 🤖 State Diagram
+### Core Systems
+
+-   State machine architecture for game states and entity behaviors
+-   Entity system with inheritance hierarchy (GameObject → Entity → Player/Enemy/etc.)
+-   Collision detection for player, enemies, pickups, and environment
+-   Save/load system using localStorage
+-   Win/loss conditions and scoring system
+
+### Game Entities
+
+-   Player character with movement, attack, and dodge mechanics
+-   Multiple enemy types with AI behaviors
+-   Essence pickups
+-   Environmental objects and obstacles
+
+### Visuals & Audio
+
+-   Sprite-based graphics with animations
+-   Background music and sound effects
+-   UI elements and HUD
+
+### 🤖 State Diagrams
 
 > [!note]
 > Remember that you'll need diagrams for not only game states but entity states as well.
 
-![State Diagram](./assets/images/StateDiagram.png)
+#### Global Game State Machine
 
-The state diagram shows the global game state machine with transitions between TitleScreen, Play, Pause, GameOver, and Victory states. Additionally, entity-level state machines are shown for Player (NORMAL, ATTACKING, ROLLING) and Enemy (IDLE, PATROL, CHASE, ATTACK, DYING).
+![Global Game State Machine](./assets/images/Global%20GameStateMachine.png)
+
+The **Global Game State Machine** manages high-level game flow and satisfies the rubric requirement for "state machine to control the state of the game globally."
+
+**Key States:**
+
+-   **TitleScreenState**: Initial menu with "New Game", "Continue", and score display
+-   **InstructionsState**: Shows game controls, gameplay mechanics, and objectives - accessible from title screen
+-   **CutsceneState**: Story cutscenes with static backgrounds and dialogue panels (intro, mid-game, ending)
+-   **PlayState**: Main gameplay - handles map rendering, entity updates, collision detection, map transitions
+-   **PauseState**: Overlay menu for pausing, upgrades, saving, and quitting
+-   **UpgradeState**: Essence upgrade interface (overlay)
+-   **GameOverState**: Triggered when player HP reaches 0, shows retry/quit options
+-   **VictoryState**: Triggered when all objectives complete, shows play again/quit options
+
+**Transitions:** States transition based on player actions (Enter key, ESC, button clicks), game events (HP <= 0, all enemies defeated), and story triggers. Map transitions within PlayState use fade tweens for smooth transitions between zones.
+
+---
+
+#### Player State Machine (Shadow Creature)
+
+![Player State Machine](./assets/images/PlayerStateMachine_ShadowCreature.png)
+
+The **Player State Machine** controls the Shadow Creature's behavior and satisfies the rubric requirement for "state machine per game entity."
+
+**States:**
+
+-   **IDLE**: Default state when standing still - player can attack (Space), dodge, or start moving. Uses idle animation (8 directions).
+-   **MOVING**: Player is moving with WASD input - uses idle animation (8 directions) since the player floats. Can transition to ATTACKING, DODGING, or return to IDLE when movement stops.
+-   **ATTACKING**: Player performs melee attack - attack animation plays, hitbox active, movement disabled. Returns to IDLE when animation completes.
+-   **DODGING**: Quick sidestep with invincibility frames - uses dodge animation. Returns to IDLE when animation completes.
+-   **HIT**: Brief state when taking damage - invincibility frames active, visual feedback (flash red). Returns to IDLE when invincibility expires, or transitions to DYING if HP <= 0.
+-   **DYING**: Death animation plays - triggers GameOverState when complete.
+
+**Transitions:**
+
+-   **IDLE** → **MOVING** when movement input is pressed
+-   **IDLE** → **ATTACKING** when Space is pressed
+-   **IDLE** → **DODGING** when dodge key is pressed
+-   **MOVING** → **IDLE** when movement input stops
+-   **MOVING** → **ATTACKING** when Space is pressed (can attack while moving)
+-   **MOVING** → **DODGING** when dodge key is pressed
+-   **ATTACKING** → **IDLE** when attack animation completes
+-   **ATTACKING** → **HIT** if interrupted by damage
+-   **DODGING** → **IDLE** when dodge animation completes
+-   **DODGING** → **HIT** if interrupted by damage
+-   **HIT** → **IDLE** when invincibility timer expires
+-   **HIT** → **DYING** if HP <= 0
+-   Any state → **DYING** if HP <= 0
+
+The player floats (no walk animation), so both IDLE and MOVING states use the idle animation, with the direction based on movement input.
+
+---
+
+#### Base Enemy State Machine
+
+![Base Enemy State Machine](./assets/images/BaseEnemyStateMachine.png)
+
+The **Base Enemy State Machine** provides the foundation for all enemy AI behaviors. Each enemy type extends this with specific variations.
+
+**States:**
+
+-   **IDLE**: Enemy stands still - uses idle animation (if available). Transitions to CHASE/PATROL when player detected.
+-   **PATROL**: Enemy moves along patrol path - uses walk/run animation. Used by Temple Guardian and Spirit Boxer.
+-   **CHASE**: Enemy moves toward player - uses walk/run/fly animation depending on enemy type. AI calculates path.
+-   **ATTACK**: Enemy performs attack animation - attack hitbox active during specific frames. Movement may continue or stop.
+-   **HIT**: Enemy takes damage - brief stun/flash. Transitions back to CHASE/IDLE or DYING if HP <= 0.
+-   **DYING**: Death animation plays - enemy removed from game when complete. May drop essence pickup.
+
+**Transitions:** States change based on player detection range, attack range, damage taken, and HP thresholds. Each enemy type overrides specific behaviors (e.g., Shadow Bat doesn't patrol, flies directly to player).
+
+---
+
+#### Shadow Bat State Machine
+
+![Shadow Bat State Machine](./assets/images/BatStateMachine.png)
+
+The **Shadow Bat** uses a simplified state machine optimized for swarm enemy behavior.
+
+**States:**
+
+-   **IDLE**: Uses idle animation - brief pause before flying.
+-   **FLY**: Uses fly animation - chases player directly (no patrol). Fast movement.
+-   **BITE**: Uses bite animation - attack state. Fast transitions.
+-   **HIT**: Uses hit animation - brief stun.
+-   **DYING**: Uses death animation - removed when complete.
+
+**Key Differences:** No patrol state (flies directly to player), faster state transitions, simpler AI focused on swarm behavior. The bat doesn't need directional sprites since it's a flying enemy.
+
+---
+
+#### Spirit Boxer State Machine
+
+![Spirit Boxer State Machine](./assets/images/SpiritBoxerStateMachine.png)
+
+The **Spirit Boxer** uses a combo-based attack system with multiple attack states.
+
+**States:**
+
+-   **IDLE**: Uses idle animation - standing ready.
+-   **CHASE**: Uses run animation - moves toward player quickly.
+-   **ATTACK1**: First attack in combo chain - uses attack1 animation (6 frames).
+-   **ATTACK2**: Second attack in combo chain - uses attack2 animation (13 frames, longest).
+-   **ATTACK3**: Third attack in combo chain - uses attack3 animation (10 frames).
+-   **HIT**: Uses damaged animation - brief stun.
+-   **DYING**: Uses death animation - removed when complete.
+
+**Key Features:** Can chain attacks (ATTACK1 → ATTACK2 → ATTACK3) if player is close. **CHASE** uses run animation for fast movement. May have a **CHARGE** state using run animation with increased speed.
+
+---
+
+#### Temple Guardian State Machine
+
+![Temple Guardian State Machine](./assets/images/TempleGuardianStateMachine.png)
+
+The **Temple Guardian** (boss) uses the most complex state machine with multiple attack types and phase-based behavior.
+
+**States:**
+
+-   **IDLE**: Standing ready - may have idle animation.
+-   **PATROL**: Uses walk animation - moves along patrol path before detecting player.
+-   **CHASE**: Uses walk animation - moves toward player (heavy, deliberate movement).
+-   **ATTACK1**: Uses attack1 animation - light attack with VFX.
+-   **ATTACK2**: Uses attack2 animation - heavier attack with VFX.
+-   **SPECIAL**: Uses special animation - telegraphed boss attack with VFX. High damage.
+-   **HIT**: Uses hit animation - brief stun when taking damage.
+-   **DYING**: Uses death animation - removed when complete.
+
+**Key Features:** Multiple attack types (ATTACK1, ATTACK2, SPECIAL) for varied boss behavior. May have phases (HP thresholds trigger different behaviors). **PATROL/CHASE** uses walk animation for heavy, deliberate movement. **SPECIAL** attacks are telegraphed for player reaction time.
 
 ### 🗺️ Class Diagram
 
@@ -147,42 +280,73 @@ The title screen will feature the game's title in a stylized sci-fi font, with a
 
 The gameplay screen will feature:
 
--   Top-left HUD showing player HP bar, XP bar, current level, and Echo Score
+-   Top-left HUD showing player HP bar
 -   Player character in the center, controlled via WASD movement
 -   Enemies spawning and patrolling the zone
--   Pickups (gold, essences, items) appearing on the ground when enemies die
+-   Essence pickups appearing on the ground when enemies die
 -   Environment objects (rocks, wreckage) providing collision and visual interest
--   Mini-map or zone indicator showing current area
 -   Pause menu accessible via ESC key
 
-The hub area will have:
+A simple upgrade screen (accessible from pause or between zones) will allow players to:
 
--   Stat upgrade interface (allocate points to Strength/Dexterity/Insight/Vitality)
--   Equipment/inventory screen
--   Zone selection (Crash Site unlocked initially)
--   Save point indicator
+-   Use collected essences to upgrade ATK or HP
+-   View current stats
 
 ### 🎨 Assets
 
 We used [app.diagrams.net](https://app.diagrams.net/) to create the wireframes. Wireframes are the equivalent to the skeleton of a web app since they are used to describe the functionality of the product and the users experience.
 
-The visual style will be dark and atmospheric, with a sci-fi/alien aesthetic. The game draws inspiration from top-down action RPGs like _Enter the Gungeon_, _Hades_, and _Risk of Rain_, focusing on clear visual feedback for combat and readable UI elements.
+The visual style will be dark and atmospheric, with a dark fantasy/horror aesthetic. The game draws inspiration from top-down action RPGs like _Enter the Gungeon_, _Hades_, and _Risk of Rain_, focusing on clear visual feedback for combat and readable UI elements. The mood is somber and emotional, reflecting the story of a lost warrior trying to reclaim their humanity.
 
 #### 🖼️ Images
 
 Sprites will be created or sourced for:
 
--   Player character (idle, walk, attack, roll animations)
--   Enemy types: Gloomling, Scrap Hound, Mini-Boss, Core Echo Boss
--   Pickups: gold coins, essence orbs, equipment items
--   Environment: terrain tiles, rocks, crashed ship wreckage
--   UI elements: HP/XP bars, buttons, icons
+-   **Player:** Shadow Creature (8 directions: idle, attack, death animations)
+-   **Enemies:**
+    -   Shadow Bat (swarm enemy - idle, fly, bite, hit, death)
+    -   Spirit Boxer (combat enforcer - idle, attack combo chain, run, damaged, death)
+    -   Temple Guardian (mini-boss - walk, attack 1, attack 2, special, hit, death)
+-   Pickups: essence orbs
+-   Environment: terrain tiles, temple structures, dark atmospheric elements
+-   UI elements: HP bar, buttons, simple upgrade interface
+-   Cutscenes: static background images for story scenes, text panel UI for dialogue
 
-Potential sources:
+**Note:** The Shadow Creature (player) is the only sprite with full 8-directional support. Other enemies use sprite flipping and angle-based facing to work in a top-down view.
 
--   Custom pixel art sprites
--   Free sprite resources from [OpenGameArt.org](https://opengameart.org/)
--   Sci-fi asset packs with appropriate licensing
+#### 👥 Character Design & Lore
+
+**Player: Shadow Creature**
+
+-   **Lore:** Your corrupted spirit form - once a legendary warrior, now a drifting shadow
+-   **Visual:** Messy, smoky silhouette with glowing eye (last memory)
+-   **Movement:** Floating, unpredictable (fits the broken spirit theme)
+-   **Abilities:** 8-directional movement, basic attacks, dodge
+-   **Role:** The player character
+
+**Shadow Bat (Swarm Enemy)**
+
+-   **Lore:** Failed souls who tried to reclaim their bodies but lost themselves completely
+-   **Visual:** Small, flying creature
+-   **Movement:** Swarms, screeches, acts as common enemy
+-   **Combat:** Fast, dies quickly, attacks in groups
+-   **Role:** Common enemy type
+
+**Spirit Boxer (Combat Enforcer)**
+
+-   **Lore:** Manifestation of your lost physical strength
+-   **Visual:** Humanoid fighter
+-   **Movement:** Combo punches, charge dash, ground slam
+-   **Combat:** Medium difficulty, combo-based attacks
+-   **Role:** Mid-tier enemy/boss
+
+**Temple Guardian (Mini-Boss #1)**
+
+-   **Lore:** Once your comrade - a knight who swore to protect your body after the ritual. Went insane trying to protect something that no longer exists
+-   **Visual:** Rigid, armored, ancient mystical
+-   **Movement:** Heavy, deliberate, slow sweeping sword strikes
+-   **Combat:** High damage, telegraphed attacks, first major boss
+-   **Role:** First big boss encounter
 
 #### ✏️ Fonts
 
@@ -210,13 +374,14 @@ All sounds will be sourced from free sound libraries with appropriate licensing:
 
 **Sound Effects:**
 
--   Player attack (melee swing or ranged shot)
+-   Player attack (melee swing)
 -   Enemy hit/death sounds
 -   Player hurt/low HP warning
--   Pickup collection (coin, essence, item)
+-   Essence pickup collection
 -   Menu click/confirm/back
--   Dodge roll sound
+-   Dodge sound
 -   Boss attack telegraphs
+-   Cutscene text advance sound (optional)
 
 Potential sources:
 
