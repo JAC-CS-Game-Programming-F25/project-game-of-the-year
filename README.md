@@ -10,54 +10,110 @@
 
 ---
 
-# Sample Proposal - Pokémon the Trading Card Game
-
-> [!note]
-> This was taken from a project I did in university so the scope is **much** larger than what I'm expecting from you in terms of number of features!
+# Game Proposal – Echoes of the Fallen Star
 
 ## ✒️ Description
 
-In this turn-based battle card game, players assume the role of a Pokémon trainer and use their Pokémon to battle their opponent's Pokémon. Players play Pokémon to the field and attack their opponent's Pokémon. A Pokémon that has sustained enough damage is Knocked Out, and the player who knocked it out draws a Prize card. There are usually six Prize cards, and the primary win condition is to draw all of them. Other ways to win are by knocking out all the Pokémon the opponent has on the field so that the opponent has none left, or if at the beginning of their opponent's turn there are no cards left to draw in the opponent's deck.
+**Working Title:** Echoes of the Fallen Star
+
+**Platform:** HTML5 Canvas (provided engine / framework)
+
+**Genre:** Top-down action RPG / "MMO-style grinder" with eerie exploration and character builds.
+
+**Core fantasy:**
+
+The player is a lone survivor who crash-lands on a mysterious alien planet. By fighting creatures, collecting loot, and absorbing monster essences, they grow stronger and shape their build (Strength/Dexterity/Insight/Affinity). The planet's sentient "Echo" watches and reacts. The long-term goal is to progress through increasingly dangerous zones, defeat the Echo at the planet's core, and "finish a run" with a chosen playstyle.
+
+**Core loop:**
+
+Explore a zone → Fight enemies → Gain XP + loot + essences → Upgrade stats, gear, skills → Unlock the next area → Eventually fight the final boss.
+
+This lets me build a highly replayable grinder while still integrating story, builds, and a clear win condition.
+
+**Scope for this project (v1):**
+
+For this course, I will implement a compact first chapter of this game:
+
+-   1 main combat zone (Crash Site) + 1 small hub area
+-   1 mini-boss + 1 final boss for this "chapter"
+-   3–4 enemy types
+-   A small set of weapons/armor/essences (not a full loot system)
+-   A simple skill/talent system (a few nodes, not full trees)
+
+Future zones, more enemies, deeper story, and New Game+ are planned as extensions, not required for this project.
 
 ## 🕹️ Gameplay
 
-Players begin by having one player select heads or tails, and the other flips a coin; the winner of the coin flip will decide who goes first or second. The player going first cannot attack their first turn, unless the card says otherwise. (Dice may be used in place of coins, with even numbers representing heads and odd numbers representing tails). Players then shuffle their decks and draw seven cards, then play one Basic Pokémon onto the field. This Pokémon is known as the Active Pokémon and is usually the one that attacks and receives damage. If a player does not have any Basic Pokémon, they must shuffle and draw a new hand, and the opponent may draw one additional card. Once both players have at least one Basic Pokémon, they can play up to five more Basic Pokémon onto their "Bench" (representing the maximum-carry limit of six from the video games). Players then take the top six cards of their deck and place them to the side as Prize Cards. Play then begins with the player who won the coin flip.
+The player controls their character using keyboard input (WASD for movement, mouse for aiming/attacking). They explore the Crash Site zone, encountering various enemies that spawn and chase the player. Combat is real-time and action-oriented, with the player able to perform basic attacks, dodge rolls, and eventually unlock abilities.
 
-Play alternates between players who may take several actions during their turn, including playing new Basic Pokémon, evolving their Pokémon, playing Trainer cards and Energy cards, and using Pokémon Abilities. A player may also retreat their Active Pokémon, switching the Active Pokémon with one on the Bench. At the end of their turn, a player may use one of their Active Pokémon's attacks, provided the prerequisite amount and types of Energy are attached to that Pokémon. Effects from that attack are then activated and damage may be placed on the Defending Pokémon; some attacks simply have effects but do not do damage. Damage may be modified depending on whether the defender has a weakness or a resistance to the attacker's Pokémon type. If the final damage exceeds the defending Pokémon's HP, it is Knocked Out, and the active player takes a prize card and ends their turn.
+As enemies are defeated, they drop:
 
-This implementation of _Pokémon the Trading Card Game_ is a single player experience with an AI. The game is played primarily with the mouse to interact with the cards and general GUI. The players can optionally hit `M` on their keyboard to mute all game sounds.
+-   **Gold** – currency for upgrades
+-   **Essences** – consumed to permanently increase stats
+-   **Equipment** – weapons, armor, and trinkets that modify combat effectiveness
+
+The player can return to the hub area to:
+
+-   Upgrade stats using essences
+-   Purchase/equip new gear
+-   Save progress
+-   Access the next zone (once unlocked)
+
+The game features a progression system where defeating enemies grants XP, and leveling up allows the player to allocate points to Strength, Dexterity, Insight, or Vitality. Different builds (e.g., high Strength for melee, high Dexterity for ranged/crit builds) create varied playstyles.
+
+Combat involves:
+
+-   Melee or ranged attacks (depending on equipped weapon)
+-   Dodge rolling for invincibility frames
+-   Enemy AI that patrols, chases, and attacks
+-   Boss fights with telegraphed attacks and multiple phases
+
+The game is played with keyboard and mouse controls. Players can pause the game at any time, and the game auto-saves when returning to the hub or defeating bosses.
 
 ## 📃 Requirements
 
-> [!note]
-> This was a web project so that's why you'll see requirements about logging in and uploading data which for you is irrelevant. Focus more on the requirements describing actions taken for gameplay.
+### 1. High-Level Architecture & Design Patterns
 
-1. The user shall register to be able to login.
-2. The user shall login to be able to play a game.
-3. The user shall upload a valid deck file.
-4. The user shall upload a valid cards file.
-5. The user shall upload a valid abilities file.
-6. The user shall select which deck they will use in the game.
-7. The user shall select which deck the AI will use in the game.
-8. The system shall "flip a coin" to decide which player goes first.
-9. The system shall shuffle the user's deck.
-10. The system shall draw the top 7 cards from the user's deck.
-11. If the user does not have a Basic Pokémon in their hand the system shall "mulligan" until they do.
-12. Upon each mulligan, the AI shall draw a card.
-13. The user shall put one of their Basic Pokémon face down as their Active Pokémon.
-14. The user shall put up to 5 more Basic Pokémon face down on their Bench.
-15. Upon a new turn, the system shall draw a card from the deck of the current player.
-16. Upon a new turn, the system shall place the drawn card in the hand of the current player.
-17. The user shall put (up to 5 total) Basic Pokémon cards from their hand onto their Bench.
-18. The user shall Evolve their Pokémon as many times as they choose.
-19. The user shall attach an Energy card from their hand to one of their Pokémon once per turn.
-20. The user shall play Trainer cards (as many as they want, but only one Supporter card and one Stadium card per turn).
-21. The user shall Retreat their Active Pokémon once per turn.
-22. The user shall use as many Abilities as they choose.
-23. The user shall attack the opponent's Active Pokémon.
-24. After a player attacks, the system shall end their turn and start their opponent's turn.
-25. The system shall execute any "special conditions" after a turn is over.
-26. The user shall pick a Victory Card when the opposing Active Pokémon dies.
+1. The system shall use a global state machine for game states (TitleScreen, Play, Pause, GameOver, Victory).
+2. The system shall use per-entity state machines for enemies (IDLE, PATROL, CHASE, ATTACK, DYING) and player (NORMAL, ATTACKING, ROLLING).
+3. The system shall implement an inheritance hierarchy: GameObject → Entity → Player/Enemy/Pickup/Projectile.
+4. The system shall use polymorphism in the main game loop to update and render all entities.
+5. The system shall use an EnemyFactory to spawn enemies based on type and level parameters.
+6. The system shall use enums for GameStateName, EnemyType, Rarity, Direction, DamageType, and StatType (no magic numbers/strings).
+
+### 2. Game Entities & Collision
+
+7. The system shall implement Player, Enemy (with subtypes), Pickup, Projectile, and EnvironmentalObject entities.
+8. The system shall detect collision between player and environment (walls, obstacles).
+9. The system shall detect collision between player and enemies (contact damage, attack hitboxes).
+10. The system shall detect collision between player and pickups (auto-collection).
+11. The system shall detect collision between player attacks and enemies (damage application).
+12. The system shall detect collision between projectiles and enemies/environment (impact handling).
+
+### 3. Persistence
+
+13. The system shall save player data (level, XP, stats, HP, equipped items) to localStorage.
+14. The system shall save game progress (boss defeat flags, zone unlocks) to localStorage.
+15. The system shall auto-save when returning to hub or defeating bosses.
+16. The system shall provide "New Game" and "Continue" options on the title screen.
+17. The system shall load saved state when selecting "Continue".
+
+### 4. Win/Loss Conditions & Scoring
+
+18. The system shall transition to GameOverState when player HP reaches 0.
+19. The system shall display stats summary (time survived, enemies defeated, Echo Score) in GameOverState.
+20. The system shall transition to VictoryState when the Core Echo boss is defeated.
+21. The system shall track Echo Score based on enemies killed, bosses defeated, and rare items obtained.
+22. The system shall save and display best Echo Score on the title screen.
+
+### 5. Visuals & Audio
+
+23. The system shall use sprite sheets for player, enemies, pickups, and environment.
+24. The system shall implement animations using Animation.js for player (idle, walk, attack, roll) and enemies (idle, move, attack, death).
+25. The system shall use tweens for screen transitions, camera shake, HP bar interpolation, and floating damage numbers.
+26. The system shall include background music for Title/Hub, Crash Site zone, and boss fight.
+27. The system shall include sound effects for player attack, enemy hit/death, player hurt, pickup collection, and menu interactions.
+28. The system shall use at least two fonts: a stylized sci-fi font for titles and a clean readable font for HUD/menus.
 
 ### 🤖 State Diagram
 
@@ -66,9 +122,13 @@ This implementation of _Pokémon the Trading Card Game_ is a single player exper
 
 ![State Diagram](./assets/images/StateDiagram.png)
 
+The state diagram shows the global game state machine with transitions between TitleScreen, Play, Pause, GameOver, and Victory states. Additionally, entity-level state machines are shown for Player (NORMAL, ATTACKING, ROLLING) and Enemy (IDLE, PATROL, CHASE, ATTACK, DYING).
+
 ### 🗺️ Class Diagram
 
 ![Class Diagram](./assets/images/ClassDiagram.png)
+
+The class diagram illustrates the inheritance hierarchy: GameObject (base) → Entity (adds health, hitbox, movement) → Player/Enemy/Pickup/Projectile/EnvironmentalObject. The EnemyFactory pattern is shown, along with the StateMachine and Animation systems.
 
 ### 🧵 Wireframes
 
@@ -77,41 +137,96 @@ This implementation of _Pokémon the Trading Card Game_ is a single player exper
 
 ![Main Menu](./assets/images/Main-Menu.png)
 
--   _Let's Play_ will navigate to the main game.
--   _Upload Cards_ will navigation to the forms for uploading and parsing the data files for the game.
--   _Change Log_ will navigate the user to a page with a list of features/changes that have been implemented throughout the development of the game.
+-   _New Game_ will start a fresh playthrough, resetting all progress.
+-   _Continue_ will load the saved game state from localStorage.
+-   _Best Echo Score_ will be displayed prominently on the title screen.
+
+The title screen will feature the game's title in a stylized sci-fi font, with a dark, atmospheric background suggesting the alien planet setting.
 
 ![Game Board](./assets/images/Game-Board.png)
 
-We want to keep the GUI as simple and clear as possible by having cards with relevant images to act as a way for the user to intuitively navigate the game. We want to implement a layout that would look like as if one were playing a match of the Pokémon Trading Card Game with physical cards in real life. Clicking on any of the cards will reveal that card's details to the player.
+The gameplay screen will feature:
+
+-   Top-left HUD showing player HP bar, XP bar, current level, and Echo Score
+-   Player character in the center, controlled via WASD movement
+-   Enemies spawning and patrolling the zone
+-   Pickups (gold, essences, items) appearing on the ground when enemies die
+-   Environment objects (rocks, wreckage) providing collision and visual interest
+-   Mini-map or zone indicator showing current area
+-   Pause menu accessible via ESC key
+
+The hub area will have:
+
+-   Stat upgrade interface (allocate points to Strength/Dexterity/Insight/Vitality)
+-   Equipment/inventory screen
+-   Zone selection (Crash Site unlocked initially)
+-   Save point indicator
 
 ### 🎨 Assets
 
 We used [app.diagrams.net](https://app.diagrams.net/) to create the wireframes. Wireframes are the equivalent to the skeleton of a web app since they are used to describe the functionality of the product and the users experience.
 
-We plan on following trends already found in other trading card video games, such as Pokémon Trading Card Game Online, Hearthstone, Magic the Gathering Arena, and Gwent.
-
-The GUI will be kept simple and playful, as to make sure the game is easy to understand what each component does and is, as well as light hearted to keep to the Pokémon theme.
+The visual style will be dark and atmospheric, with a sci-fi/alien aesthetic. The game draws inspiration from top-down action RPGs like _Enter the Gungeon_, _Hades_, and _Risk of Rain_, focusing on clear visual feedback for combat and readable UI elements.
 
 #### 🖼️ Images
 
--   Most images will be used from the well known community driven wikipedia site, [Bulbapedia](https://bulbapedia.bulbagarden.net/wiki/Main_Page).
--   Especially their [Trading Card Game section](<https://bulbapedia.bulbagarden.net/wiki/Full_Art_card_(TCG)>).
+Sprites will be created or sourced for:
+
+-   Player character (idle, walk, attack, roll animations)
+-   Enemy types: Gloomling, Scrap Hound, Mini-Boss, Core Echo Boss
+-   Pickups: gold coins, essence orbs, equipment items
+-   Environment: terrain tiles, rocks, crashed ship wreckage
+-   UI elements: HP/XP bars, buttons, icons
+
+Potential sources:
+
+-   Custom pixel art sprites
+-   Free sprite resources from [OpenGameArt.org](https://opengameart.org/)
+-   Sci-fi asset packs with appropriate licensing
 
 #### ✏️ Fonts
 
-For fonts, a simple sans-serif like Roboto will look quite nice. It's a font that is legible, light on storage size, and fun to keep with the theme we're going for. We also used a more cartoonish Pokemon font for the title screen.
+The game will use two distinct fonts:
 
--   [Pokemon](https://www.dafont.com/pokemon.font)
--   [Roboto](https://fonts.google.com/specimen/Roboto)
+-   **Title/Headings:** A stylized sci-fi or alien-themed font for the game title, "VICTORY", "GAME OVER", and major UI headings. Examples:
+
+    -   [Orbitron](https://fonts.google.com/specimen/Orbitron) (Google Fonts)
+    -   [Exo 2](https://fonts.google.com/specimen/Exo+2) (Google Fonts)
+    -   Custom pixel/retro sci-fi fonts from [dafont.com](https://www.dafont.com/)
+
+-   **Body/HUD:** A clean, readable sans-serif font for in-game HUD, menus, tooltips, and dialog. Examples:
+    -   [Roboto](https://fonts.google.com/specimen/Roboto) (Google Fonts)
+    -   [Inter](https://fonts.google.com/specimen/Inter) (Google Fonts)
 
 #### 🔊 Sounds
 
-All sounds were taken from [freesound.org](https://freesound.org) for the actions pertaining to cards.
+All sounds will be sourced from free sound libraries with appropriate licensing:
 
--   [Shuffle cards](https://freesound.org/people/VKProduktion/sounds/217502/)
--   [Flip card](https://freesound.org/people/Splashdust/sounds/84322/)
+**Background Music:**
+
+-   Ambient, atmospheric track for Title/Hub area
+-   Tension-building track for Crash Site zone
+-   Intense, boss-fight music for Core Echo encounter
+
+**Sound Effects:**
+
+-   Player attack (melee swing or ranged shot)
+-   Enemy hit/death sounds
+-   Player hurt/low HP warning
+-   Pickup collection (coin, essence, item)
+-   Menu click/confirm/back
+-   Dodge roll sound
+-   Boss attack telegraphs
+
+Potential sources:
+
+-   [freesound.org](https://freesound.org/) (with appropriate Creative Commons licensing)
+-   [OpenGameArt.org](https://opengameart.org/) audio section
+-   [Incompetech](https://incompetech.com/music/) for background music (Kevin MacLeod)
 
 ### 📚 References
 
--   [Pokemon Rulebook](http://assets.pokemon.com/assets/cms2/pdf/trading-card-game/rulebook/xy8-rulebook-en.pdf)
+-   Top-down action RPG design patterns and game feel
+-   State machine architecture for game development
+-   HTML5 Canvas game development best practices
+-   LocalStorage API for game save/load functionality
