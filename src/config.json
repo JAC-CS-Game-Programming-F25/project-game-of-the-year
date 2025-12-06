@@ -6,6 +6,19 @@
 
 	],
 	"sounds": [
-		
+		{
+			"name": "background-music",
+			"path": "./assets/sounds/background-music.mp3",
+			"size": 1,
+			"volume": 0.5,
+			"loop": true
+		},
+		{
+			"name": "menu-navigate",
+			"path": "./assets/sounds/menu-navigate.wav",
+			"size": 3,
+			"volume": 0.7,
+			"loop": false
+		}
 	]
 }

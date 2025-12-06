@@ -5,13 +5,13 @@ import StateMachine from '../lib/StateMachine.js';
 import Timer from '../lib/Timer.js';
 import Input from '../lib/Input.js';
 
-export const canvas = document.createElement('canvas');
-export const context =
-	canvas.getContext('2d') || new CanvasRenderingContext2D();
+// Use game-canvas from DOM if it exists, otherwise create one
+export const canvas = document.getElementById('game-canvas') || document.createElement('canvas');
+export const context = canvas.getContext('2d') || new CanvasRenderingContext2D();
 
 // Replace these values according to how big you want your canvas.
-export const CANVAS_WIDTH = 0;
-export const CANVAS_HEIGHT = 0;
+export const CANVAS_WIDTH = 1280;
+export const CANVAS_HEIGHT = 720;
 
 const resizeCanvas = () => {
 	const scaleX = window.innerWidth / CANVAS_WIDTH;
