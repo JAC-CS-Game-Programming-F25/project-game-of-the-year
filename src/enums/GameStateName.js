@@ -1,8 +1,14 @@
+/**
+ * Global game state machine states.
+ */
 const GameStateName = {
-	GameOver: 'game-over',
-	Play: 'play',
-	Victory: 'victory',
 	TitleScreen: 'title-screen',
+	Instructions: 'instructions',
+	Cutscene: 'cutscene',
+	Play: 'play',
+	Pause: 'pause',
+	GameOver: 'game-over',
+	Victory: 'victory',
 };
 
 export default GameStateName;
