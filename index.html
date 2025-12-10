@@ -341,17 +341,27 @@
             let assetsLoaded = false;
 
             window.onAssetsLoaded = function () {
+                console.log('Assets loaded, enabling Enter key');
                 assetsLoaded = true;
             };
+            
+            // Debug: log when Enter is pressed
+            console.log('Title screen script loaded');
 
             document.addEventListener("keydown", (e) => {
                 if (e.key === "Enter" || e.keyCode === 13) {
+                    console.log('Enter pressed, currentScreen:', currentScreen, 'assetsLoaded:', assetsLoaded);
                     if (currentScreen === "loading" && assetsLoaded) {
+                        console.log('Showing menu...');
                         if (window.showMenu) {
                             window.showMenu();
+                        } else {
+                            console.error('window.showMenu is not defined!');
                         }
                     } else if (currentScreen === "menu") {
                         selectCurrentOption();
+                    } else {
+                        console.log('Enter key ignored - currentScreen:', currentScreen, 'assetsLoaded:', assetsLoaded);
                     }
                 } else if (currentScreen === "menu") {
                     if (
