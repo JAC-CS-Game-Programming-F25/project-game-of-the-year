@@ -7,7 +7,7 @@ import EntityState from '../../../enums/EntityState.js';
 export default class EnemyHitState extends State {
 	constructor() {
 		super();
-		this.stunDuration = 0.3; // seconds
+		this.stunDuration = 0.5; // seconds - increased for breathing room
 		this.stunTimer = 0;
 	}
 

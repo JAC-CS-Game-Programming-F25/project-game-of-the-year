@@ -27,10 +27,16 @@ export default class EnemyChaseState extends State {
 			return;
 		}
 		
-		// Check if player is in attack range
+		// Check if player is in attack range and cooldown expired
 		if (enemy.isPlayerInAttackRange(enemy.target)) {
-			this.stateMachine.change(EntityState.ATTACK);
-			return;
+			// Check attack cooldown
+			const timeSinceLastAttack = Date.now() - (enemy.lastAttackTime || 0);
+			const cooldownMs = 1500; // 1.5 seconds
+			
+			if (timeSinceLastAttack >= cooldownMs) {
+				this.stateMachine.change(EntityState.ATTACK);
+				return;
+			}
 		}
 		
 		// Check if player escaped
@@ -46,6 +52,11 @@ export default class EnemyChaseState extends State {
 				this.stateMachine.change(EntityState.IDLE);
 			}
 			return;
+		}
+		
+		// Don't move during idle-to-fly transition animation
+		if (enemy.transitionToFly) {
+			return; // Wait for animation to finish
 		}
 		
 		// Continue chasing
