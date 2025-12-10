@@ -3,6 +3,8 @@ import Map from "../systems/Map.js";
 import Camera from "../systems/Camera.js";
 import Player from "../entities/Player.js";
 import Direction from "../enums/Direction.js";
+import Factory from "../services/Factory.js";
+import EnemyType from "../enums/EnemyType.js";
 import { images, input, CANVAS_WIDTH, CANVAS_HEIGHT, canvas } from "../globals.js";
 import Input from "../../lib/Input.js";
 
@@ -12,6 +14,7 @@ export default class PlayState extends State {
 		this.map = null;
 		this.camera = null;
 		this.player = null;
+		this.enemies = []; // Array of enemies
 	}
 
 	async enter() {
@@ -33,6 +36,9 @@ export default class PlayState extends State {
 			const startY = mapHeight / 2;
 			this.player = new Player(startX, startY, 32, 32);
 			this.player.direction = Direction.S;
+			
+			// Spawn test enemies (Shadow Bats)
+			this.spawnTestEnemies();
 
 			// Set camera bounds (this will center if map is smaller than canvas)
 			this.camera.setBounds(mapWidth, mapHeight);
@@ -69,6 +75,27 @@ export default class PlayState extends State {
 		}
 	}
 
+	/**
+	 * Spawn test enemies for development.
+	 */
+	spawnTestEnemies() {
+		if (!this.player) return;
+		
+		// Spawn 2-3 Shadow Bats further away so idle animation is visible
+		const bat1 = Factory.createEnemy(EnemyType.ShadowBat, this.player.x + 400, this.player.y - 200);
+		const bat2 = Factory.createEnemy(EnemyType.ShadowBat, this.player.x - 400, this.player.y + 200);
+		const bat3 = Factory.createEnemy(EnemyType.ShadowBat, this.player.x + 300, this.player.y + 350);
+		
+		// Set player as target for all bats
+		bat1.target = this.player;
+		bat2.target = this.player;
+		bat3.target = this.player;
+		
+		this.enemies.push(bat1, bat2, bat3);
+		
+		console.log('PlayState: Spawned', this.enemies.length, 'Shadow Bats (detection range: 250px)');
+	}
+
 	update(dt) {
 		// Debug: Check if input is working
 		if (input && (input.isKeyHeld(Input.KEYS.W) || input.isKeyHeld(Input.KEYS.A) || input.isKeyHeld(Input.KEYS.S) || input.isKeyHeld(Input.KEYS.D))) {
@@ -100,6 +127,14 @@ export default class PlayState extends State {
 		if (this.player && this.map && this.map.loaded) {
 			this.checkTileCollision(prevX, prevY);
 		}
+
+		// Update enemies
+		for (const enemy of this.enemies) {
+			enemy.update(dt);
+		}
+
+		// Remove dead enemies
+		this.enemies = this.enemies.filter(enemy => !enemy.readyForRemoval);
 
 		// Update camera
 		if (this.camera) {
@@ -161,6 +196,14 @@ export default class PlayState extends State {
 		if (this.map && this.map.loaded) {
 			this.map.render(context, this.camera);
 		}
+
+		// Render enemies (offset by camera)
+		context.save();
+		context.translate(-this.camera.x, -this.camera.y);
+		for (const enemy of this.enemies) {
+			enemy.render(context, images);
+		}
+		context.restore();
 
 		// Render player (offset by camera)
 		if (this.player) {
