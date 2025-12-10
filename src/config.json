@@ -1,6 +1,125 @@
 {
 	"images": [
-
+		{
+			"name": "ground-rocks",
+			"path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Ground_rocks.png",
+			"width": 496,
+			"height": 592
+		},
+		{
+			"name": "objects",
+			"path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Objects.png",
+			"width": 768,
+			"height": 704
+		},
+		{
+			"name": "temple",
+			"path": "./assets/Sprites/DARK - Temple Guardians/Temple/Temple.png",
+			"width": 135,
+			"height": 109
+		},
+		{
+			"name": "enemy-idle-s",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-S.png",
+			"width": 3072,
+			"height": 256
+		},
+		{
+			"name": "enemy-idle-n",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-N.png",
+			"width": 3072,
+			"height": 256
+		},
+		{
+			"name": "enemy-idle-e",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-E.png",
+			"width": 3072,
+			"height": 256
+		},
+		{
+			"name": "enemy-idle-w",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-W.png",
+			"width": 3072,
+			"height": 256
+		},
+		{
+			"name": "enemy-idle-ne",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-NE.png",
+			"width": 3072,
+			"height": 256
+		},
+		{
+			"name": "enemy-idle-nw",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-NW.png",
+			"width": 3072,
+			"height": 256
+		},
+		{
+			"name": "enemy-idle-se",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-SE.png",
+			"width": 3072,
+			"height": 256
+		},
+		{
+			"name": "enemy-idle-sw",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-SW.png",
+			"width": 3072,
+			"height": 256
+		},
+		{
+			"name": "enemy-attack-s",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-S.png",
+			"width": 6144,
+			"height": 256
+		},
+		{
+			"name": "enemy-attack-n",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-N.png",
+			"width": 6144,
+			"height": 256
+		},
+		{
+			"name": "enemy-attack-e",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-E.png",
+			"width": 6144,
+			"height": 256
+		},
+		{
+			"name": "enemy-attack-w",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-W.png",
+			"width": 6144,
+			"height": 256
+		},
+		{
+			"name": "enemy-attack-ne",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-NE.png",
+			"width": 6144,
+			"height": 256
+		},
+		{
+			"name": "enemy-attack-nw",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-NW.png",
+			"width": 6144,
+			"height": 256
+		},
+		{
+			"name": "enemy-attack-se",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-SE.png",
+			"width": 6144,
+			"height": 256
+		},
+		{
+			"name": "enemy-attack-sw",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-SW.png",
+			"width": 6144,
+			"height": 256
+		},
+		{
+			"name": "enemy-death-s",
+			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Death.png",
+			"width": 6144,
+			"height": 256
+		}
 	],
 	"fonts": [
 

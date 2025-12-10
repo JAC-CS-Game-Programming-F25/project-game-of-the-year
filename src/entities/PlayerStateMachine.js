@@ -23,19 +23,30 @@ export default class PlayerStateMachine extends EntityStateMachine {
 		this.add(PlayerState.HIT, new PlayerHitState());
 		this.add(PlayerState.DYING, new PlayerDyingState());
 		
-		// Start in IDLE state
-		this.change(PlayerState.IDLE);
+		// Debug: Check player HP at initialization
+		console.log('PlayerStateMachine init: Player HP:', player.hp, 'isAlive:', player.isAlive());
+		
+		// Force set to IDLE state (the add() method sets currentState to last added, which is DYING)
+		this.currentState = this.states[PlayerState.IDLE];
+		if (this.currentState) {
+			this.currentState.enter();
+			console.log('PlayerStateMachine: Forced to IDLE state');
+		}
 	}
 
 	update(dt, input) {
 		// Check for death transition (can happen from any state)
-		if (!this.entity.isAlive() && this.currentState?.name !== PlayerState.DYING) {
+		// Only check if player is actually dead (hp <= 0), not just if isAlive() returns false initially
+		if (this.entity.hp <= 0 && this.currentState?.name !== PlayerState.DYING) {
 			this.change(PlayerState.DYING);
+			return;
 		}
 		
 		// Update current state
 		if (this.currentState) {
 			this.currentState.update(dt, input);
+		} else {
+			console.error('PlayerStateMachine: No current state!');
 		}
 	}
 

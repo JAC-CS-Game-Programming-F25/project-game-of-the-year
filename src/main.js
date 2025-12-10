@@ -21,10 +21,23 @@ import {
 	sounds,
 	stateMachine,
 } from './globals.js';
-import PlayState from './states/PlayState.js';
+// Import states - wrap PlayState in try-catch since it has dependencies that might fail
 import GameOverState from './states/GameOverState.js';
 import VictoryState from './states/VictoryState.js';
 import TitleScreenState from './states/TitleScreenState.js';
+
+let PlayState = null;
+try {
+	PlayState = (await import('./states/PlayState.js')).default;
+} catch (error) {
+	console.error('Error loading PlayState:', error);
+	// Create a placeholder PlayState that won't break
+	PlayState = class extends TitleScreenState {
+		async enter() {
+			console.error('PlayState failed to load. Please check console for errors.');
+		}
+	};
+}
 
 // Set the dimensions of the play area (canvas already exists in DOM from index.html)
 canvas.width = CANVAS_WIDTH;
@@ -44,10 +57,18 @@ fonts.load(fontDefinitions);
 sounds.load(soundDefinitions);
 
 // Add all the states to the state machine.
-stateMachine.add(GameStateName.TitleScreen, new TitleScreenState());
-stateMachine.add(GameStateName.GameOver, new GameOverState());
-stateMachine.add(GameStateName.Victory, new VictoryState());
-stateMachine.add(GameStateName.Play, new PlayState());
+// Make sure TitleScreen is added first and set as initial state
+try {
+	stateMachine.add(GameStateName.TitleScreen, new TitleScreenState());
+	stateMachine.add(GameStateName.GameOver, new GameOverState());
+	stateMachine.add(GameStateName.Victory, new VictoryState());
+	stateMachine.add(GameStateName.Play, new PlayState());
+	// Set TitleScreen as the initial state (not the last one added)
+	stateMachine.change(GameStateName.TitleScreen);
+} catch (error) {
+	console.error('Error initializing states:', error);
+	// Continue anyway - at least TitleScreen should work
+}
 
 // Create game instance but don't start it yet
 const game = new Game(
@@ -68,9 +89,12 @@ window.startGame = function() {
 	canvas.focus();
 };
 
-// Notify that assets are loaded
+// Notify that assets are loaded (this MUST run for Enter key to work)
+console.log('main.js: Assets loaded, calling onAssetsLoaded');
 if (window.onAssetsLoaded) {
 	window.onAssetsLoaded();
+} else {
+	console.error('window.onAssetsLoaded is not defined!');
 }
 
 // Function to start background music (called after user interaction)

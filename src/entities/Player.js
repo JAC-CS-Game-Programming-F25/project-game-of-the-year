@@ -24,19 +24,20 @@ export default class Player extends Entity {
 		// Movement
 		this.speed = 100; // pixels per second
 		
-		// Sprite configuration (from enemy-sprite.md)
-		this.frameSize = 256; // Each frame is 256x256 pixels
-		this.displayScale = 2; // Scale up for visibility
+		// Sprite configuration
+		this.frameSize = 256;
+		this.displayScale = 0.5;
 		this.displaySize = this.frameSize * this.displayScale;
 		
 		// Animation state
 		this.currentAnimation = 'idle'; // 'idle', 'attack', 'death'
 		this.currentFrame = 0;
 		this.frameTime = 0;
-		this.frameInterval = 0.15; // seconds per frame
+		this.frameInterval = 0.15; // seconds per frame (idle)
+		this.attackFrameInterval = 0.05; // Attack animation: 24 frames × 0.05 = 1.2 seconds total
+		this.totalFrames = 0; // Will be calculated from sprite sheet
 		
-		// Direction mappings (from enemy-sprite.md)
-		// Idle mapping (NW/NE swapped due to sprite mislabeling)
+		// Direction mappings (NW/NE swapped for idle due to sprite mislabeling)
 		this.directionToSpriteIdle = {
 			[Direction.E]: 'e',
 			[Direction.SE]: 'se',
@@ -62,6 +63,7 @@ export default class Player extends Entity {
 		
 		// Initialize state machine
 		this.stateMachine = new PlayerStateMachine(this);
+		console.log('Player: State machine initialized, current state:', this.stateMachine.currentState?.name);
 	}
 
 	update(dt, input, images) {
@@ -70,9 +72,11 @@ export default class Player extends Entity {
 			this.invincibilityTimer -= dt;
 		}
 		
-		// Update frame animation (from enemy-sprite.md)
+		// Update frame animation
+		const currentInterval = this.currentAnimation === 'attack' ? this.attackFrameInterval : this.frameInterval;
+		
 		this.frameTime += dt;
-		if (this.frameTime >= this.frameInterval) {
+		if (this.frameTime >= currentInterval) {
 			this.frameTime = 0;
 			
 			// Get current sprite to calculate total frames
@@ -87,22 +91,30 @@ export default class Player extends Entity {
 			
 			const spriteImage = images?.get(spriteName);
 			if (spriteImage && spriteImage.image && spriteImage.image.complete) {
-				const framesPerRow = Math.floor(spriteImage.image.width / this.frameSize);
-				const rows = Math.floor(spriteImage.image.height / this.frameSize);
-				const totalFrames = framesPerRow * rows;
+				// Use actual image dimensions
+				const actualWidth = spriteImage.image.naturalWidth || spriteImage.image.width;
+				const actualHeight = spriteImage.image.naturalHeight || spriteImage.image.height;
+				const framesPerRow = Math.floor(actualWidth / this.frameSize);
+				const rows = Math.floor(actualHeight / this.frameSize);
+				this.totalFrames = framesPerRow * rows;
 				
 				// Cycle to next frame
-				this.currentFrame = (this.currentFrame + 1) % totalFrames;
+				this.currentFrame = (this.currentFrame + 1) % this.totalFrames;
 			}
 		}
 		
-		// Update entity (handles state machine)
-		super.update(dt);
-		
-		// Update state machine with input
+		// Update state machine with input (don't call super.update for state machine)
 		if (this.stateMachine) {
 			this.stateMachine.update(dt, input);
 		}
+		
+		// Update animation (from Entity, but skip state machine since we handle it above)
+		if (this.animation) {
+			this.animation.update(dt);
+		}
+		
+		// Update hitbox position to match entity position
+		this.hitbox.set(this.x, this.y, this.width, this.height);
 	}
 	
 	/**
@@ -114,7 +126,16 @@ export default class Player extends Entity {
 			this.currentAnimation = animation;
 			this.currentFrame = 0; // Reset to first frame
 			this.frameTime = 0;
+			console.log('Player: Animation changed to', animation);
 		}
+	}
+	
+	/**
+	 * Check if current animation has completed all frames
+	 * @returns {boolean}
+	 */
+	isAnimationComplete() {
+		return this.totalFrames > 0 && this.currentFrame === this.totalFrames - 1;
 	}
 
 	render(ctx, images) {
@@ -127,7 +148,7 @@ export default class Player extends Entity {
 			}
 		}
 		
-		// Get sprite based on animation and direction (from enemy-sprite.md)
+		// Get sprite based on animation and direction
 		const mapping = this.currentAnimation === 'idle' 
 			? this.directionToSpriteIdle 
 			: this.directionToSpriteAttack;
@@ -146,8 +167,9 @@ export default class Player extends Entity {
 		const spriteImage = images?.get(spriteName);
 		
 		if (spriteImage && spriteImage.image && spriteImage.image.complete) {
-			// Calculate frame grid position (from enemy-sprite.md)
-			const framesPerRow = Math.floor(spriteImage.image.width / this.frameSize);
+			// Calculate frame grid position
+			const actualWidth = spriteImage.image.naturalWidth || spriteImage.image.width;
+			const framesPerRow = Math.floor(actualWidth / this.frameSize);
 			const frameRow = Math.floor(this.currentFrame / framesPerRow);
 			const frameCol = this.currentFrame % framesPerRow;
 			const sourceX = frameCol * this.frameSize;

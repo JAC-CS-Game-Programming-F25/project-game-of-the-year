@@ -2,38 +2,53 @@ import State from '../../../../lib/State.js';
 import PlayerState from '../../../enums/PlayerState.js';
 
 /**
- * Player ATTACKING state.
- * Player performs melee attack. Attack animation plays, hitbox active, movement disabled.
+ * Player ATTACKING state - plays attack animation once, then returns to idle
  */
 export default class PlayerAttackingState extends State {
 	constructor() {
 		super();
-		this.attackDuration = 0.5; // seconds
-		this.attackTimer = 0;
+		this.hasSeenLastFrame = false;
 	}
 
 	enter() {
-		this.attackTimer = this.attackDuration;
-		// Set attack animation
-		this.stateMachine.entity.setAnimation('attack');
+		const player = this.stateMachine.entity;
+		
+		// Set attack animation (this resets frame to 0)
+		player.setAnimation('attack');
+		this.hasSeenLastFrame = false;
+		
 		// TODO: Activate attack hitbox
+		console.log('PlayerAttackingState: Attack started, total frames:', player.totalFrames);
 	}
 
 	exit() {
+		// Reset to idle animation
+		const player = this.stateMachine.entity;
+		player.setAnimation('idle');
+		
 		// TODO: Deactivate attack hitbox
+		console.log('PlayerAttackingState: Attack finished at frame', player.currentFrame);
 	}
 
 	update(dt, input) {
-		this.attackTimer -= dt;
+		const player = this.stateMachine.entity;
 		
-		// Attack complete, return to IDLE
-		if (this.attackTimer <= 0) {
-			this.stateMachine.change(PlayerState.IDLE);
+		// Wait for animation to complete one full cycle
+		if (player.totalFrames > 0) {
+			if (player.currentFrame >= player.totalFrames - 1) {
+				this.hasSeenLastFrame = true;
+			}
+			
+			// Done when we loop back to start
+			if (this.hasSeenLastFrame && player.currentFrame <= 2) {
+				this.stateMachine.change(PlayerState.IDLE);
+				return;
+			}
 		}
 	}
 
 	render() {
-		// Rendering handled by Player class
+		// Player handles rendering
 	}
 }
 
