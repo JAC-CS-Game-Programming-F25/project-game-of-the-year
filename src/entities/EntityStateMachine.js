@@ -12,6 +12,12 @@ export default class EntityStateMachine extends StateMachine {
 		this.previousState = null;
 	}
 
+	add(stateName, state) {
+		state.name = stateName;
+		state.stateMachine = this; // Give state access to state machine
+		super.add(stateName, state);
+	}
+
 	change(stateName, enterParameters) {
 		// Store previous state before changing
 		if (this.currentState) {
