@@ -119,6 +119,36 @@
 			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Death.png",
 			"width": 6144,
 			"height": 256
+		},
+		{
+			"name": "bat-idle",
+			"path": "./assets/Sprites/Bat/idle.png",
+			"width": 308,
+			"height": 92
+		},
+		{
+			"name": "bat-idle-to-fly",
+			"path": "./assets/Sprites/Bat/idle to fly.png",
+			"width": 264,
+			"height": 92
+		},
+		{
+			"name": "bat-fly",
+			"path": "./assets/Sprites/Bat/fly.png",
+			"width": 308,
+			"height": 92
+		},
+		{
+			"name": "bat-bite",
+			"path": "./assets/Sprites/Bat/bite.png",
+			"width": 352,
+			"height": 92
+		},
+		{
+			"name": "bat-hit-death",
+			"path": "./assets/Sprites/Bat/hit and death.png",
+			"width": 308,
+			"height": 92
 		}
 	],
 	"fonts": [
