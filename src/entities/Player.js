@@ -15,11 +15,12 @@ export default class Player extends Entity {
 		
 		// Player-specific stats
 		this.attackDamage = 10;
-		this.attackRange = 50;
+		this.attackRange = 80; // Large range for testing
 		this.dodgeSpeed = 200;
 		this.dodgeDuration = 0.3; // seconds
 		this.invincibilityTimer = 0;
-		this.invincibilityDuration = 1.0; // seconds
+		this.invincibilityDuration = 0.8; // seconds (shorter for faster gameplay)
+		this.hasDealtDamage = false; // Reset each attack
 		
 		// Movement
 		this.speed = 100; // pixels per second
@@ -139,12 +140,24 @@ export default class Player extends Entity {
 	}
 
 	render(ctx, images) {
-		// Handle invincibility flicker (visual feedback)
-		if (this.invincibilityTimer > 0) {
-			const flickerRate = 0.1; // seconds per flicker
+		// Vanish effect when in HIT state
+		const isHit = this.stateMachine?.currentState?.name === 'hit';
+		if (isHit) {
+			// Quick fade to almost invisible (only eyes remain visible)
+			ctx.save();
+			ctx.globalAlpha = 0.15; // Almost fully transparent (vanish effect)
+		}
+		
+		// Only flicker at low health (below 30%)
+		const hpPercent = this.hp / this.maxHp;
+		const isLowHealth = hpPercent <= 0.3;
+		
+		if (isLowHealth && this.invincibilityTimer > 0 && !isHit) {
+			// Flicker when low health and recently hit (but not during hit animation)
+			const flickerRate = 0.08;
 			const shouldShow = Math.floor(this.invincibilityTimer / flickerRate) % 2 === 0;
 			if (!shouldShow) {
-				return; // Skip rendering this frame for flicker effect
+				return; // Skip rendering for flicker
 			}
 		}
 		
@@ -191,6 +204,11 @@ export default class Player extends Entity {
 			ctx.fillStyle = 'rgba(100, 50, 200, 0.8)';
 			ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
 		}
+		
+		// Restore context if vanish effect was applied
+		if (isHit) {
+			ctx.restore();
+		}
 	}
 
 	/**
@@ -224,14 +242,21 @@ export default class Player extends Entity {
 			return; // Can't take damage while invincible
 		}
 		
+		// Don't interrupt attacks (super armor)
+		const isAttacking = this.stateMachine.currentState?.name === 'attacking';
+		
 		super.takeDamage(amount);
 		
 		// Set invincibility timer
 		this.invincibilityTimer = this.invincibilityDuration;
 		
-		// Transition to HIT state if not already dying
-		if (this.isAlive() && this.stateMachine.currentState?.name !== 'dying') {
+		// TODO: Play hit sound effect here
+		
+		// Quick vanish flash (HIT state) unless attacking or dying
+		if (this.isAlive() && !isAttacking && this.stateMachine.currentState?.name !== 'dying') {
 			this.stateMachine.change('hit');
+		} else if (!this.isAlive() && this.stateMachine.currentState?.name !== 'dying') {
+			this.stateMachine.change('dying');
 		}
 	}
 }

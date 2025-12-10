@@ -1,11 +1,13 @@
 import State from "../../lib/State.js";
 import Map from "../systems/Map.js";
 import Camera from "../systems/Camera.js";
+import CollisionManager from "../systems/CollisionManager.js";
 import Player from "../entities/Player.js";
 import Direction from "../enums/Direction.js";
 import Factory from "../services/Factory.js";
 import EnemyType from "../enums/EnemyType.js";
-import { images, input, CANVAS_WIDTH, CANVAS_HEIGHT, canvas } from "../globals.js";
+import GameStateName from "../enums/GameStateName.js";
+import { images, input, CANVAS_WIDTH, CANVAS_HEIGHT, canvas, stateMachine } from "../globals.js";
 import Input from "../../lib/Input.js";
 
 export default class PlayState extends State {
@@ -14,7 +16,8 @@ export default class PlayState extends State {
 		this.map = null;
 		this.camera = null;
 		this.player = null;
-		this.enemies = []; // Array of enemies
+		this.enemies = [];
+		this.collisionManager = new CollisionManager();
 	}
 
 	async enter() {
@@ -39,6 +42,10 @@ export default class PlayState extends State {
 			
 			// Spawn test enemies (Shadow Bats)
 			this.spawnTestEnemies();
+			
+			// Initialize collision manager
+			this.collisionManager.setPlayer(this.player);
+			this.collisionManager.setEnemies(this.enemies);
 
 			// Set camera bounds (this will center if map is smaller than canvas)
 			this.camera.setBounds(mapWidth, mapHeight);
@@ -135,6 +142,23 @@ export default class PlayState extends State {
 
 		// Remove dead enemies
 		this.enemies = this.enemies.filter(enemy => !enemy.readyForRemoval);
+		
+		// Update collision manager with current enemies
+		this.collisionManager.setEnemies(this.enemies);
+
+		// Check combat collisions
+		this.collisionManager.checkCollisions();
+		
+		// Check if player died
+		if (this.player && !this.player.isAlive() && this.player.stateMachine.currentState.name !== 'dying') {
+			this.player.stateMachine.change('dying');
+		}
+		
+		// Check if player death animation complete (transition to GameOver)
+		if (this.player && this.player.stateMachine.currentState.name === 'dying' && this.player.readyForGameOver) {
+			stateMachine.change(GameStateName.GameOver);
+			return;
+		}
 
 		// Update camera
 		if (this.camera) {
@@ -215,5 +239,45 @@ export default class PlayState extends State {
 
 		// Restore context
 		context.restore();
+		
+		// Render HUD (no camera offset)
+		this.renderHUD(context);
+	}
+	
+	/**
+	 * Render HUD elements (HP bar, etc).
+	 */
+	renderHUD(context) {
+		if (!this.player) return;
+		
+		// HP Bar (top-left corner)
+		const barX = 20;
+		const barY = 20;
+		const barWidth = 200;
+		const barHeight = 20;
+		const hpPercent = this.player.hp / this.player.maxHp;
+		
+		// Background (black)
+		context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+		context.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 4);
+		
+		// Empty bar (dark red)
+		context.fillStyle = '#3a0000';
+		context.fillRect(barX, barY, barWidth, barHeight);
+		
+		// HP bar (red)
+		context.fillStyle = '#cc0000';
+		context.fillRect(barX, barY, barWidth * hpPercent, barHeight);
+		
+		// Border (white)
+		context.strokeStyle = '#ffffff';
+		context.lineWidth = 2;
+		context.strokeRect(barX, barY, barWidth, barHeight);
+		
+		// HP Text
+		context.fillStyle = '#ffffff';
+		context.font = '14px Arial';
+		context.textAlign = 'left';
+		context.fillText(`HP: ${Math.ceil(this.player.hp)} / ${this.player.maxHp}`, barX + 5, barY + 15);
 	}
 }

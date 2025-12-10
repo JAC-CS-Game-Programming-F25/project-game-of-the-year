@@ -17,7 +17,9 @@ export default class PlayerAttackingState extends State {
 		player.setAnimation('attack');
 		this.hasSeenLastFrame = false;
 		
-		// TODO: Activate attack hitbox
+		// Reset damage flag for this attack
+		player.hasDealtDamage = false;
+		
 		console.log('PlayerAttackingState: Attack started, total frames:', player.totalFrames);
 	}
 

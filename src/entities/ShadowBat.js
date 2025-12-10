@@ -13,7 +13,7 @@ export default class ShadowBat extends Enemy {
 		this.hp = 20;
 		this.maxHp = 20;
 		this.attackDamage = 3;
-		this.attackRange = 30;
+		this.attackRange = 55; // Can attack from hover distance
 		this.detectionRange = 250;
 		this.speed = 100; // Fast flyer
 		this.chaseSpeed = 120;
@@ -31,6 +31,7 @@ export default class ShadowBat extends Enemy {
 		this.frameTime = 0;
 		this.frameInterval = 0.12; // Fast animation for bat
 		this.totalFrames = 0;
+		this.transitionToFly = false; // Flag for idle-to-fly transition
 		
 		// Animation frame counts
 		this.animationFrames = {
@@ -57,8 +58,8 @@ export default class ShadowBat extends Enemy {
 		// Map state machine animation names to bat animation names
 		const animationMap = {
 			'idle': 'idle',
-			'walk': 'fly',  // No walk animation, use fly
-			'chase': 'fly', // Chase uses fly animation
+			'walk': 'fly',
+			'chase': 'fly',
 			'attack': 'bite',
 			'hit': 'hit',
 			'death': 'death'
@@ -67,7 +68,14 @@ export default class ShadowBat extends Enemy {
 		const mappedAnimation = animationMap[animation] || animation;
 		
 		if (this.currentAnimation !== mappedAnimation) {
-			this.currentAnimation = mappedAnimation;
+			// Special case: play idle-to-fly transition when going from idle to fly
+			if (this.currentAnimation === 'idle' && mappedAnimation === 'fly') {
+				this.currentAnimation = 'idle-to-fly';
+				this.transitionToFly = true;
+			} else {
+				this.currentAnimation = mappedAnimation;
+				this.transitionToFly = false;
+			}
 			this.currentFrame = 0;
 			this.frameTime = 0;
 		}
@@ -81,7 +89,16 @@ export default class ShadowBat extends Enemy {
 			
 			const maxFrames = this.animationFrames[this.currentAnimation];
 			if (maxFrames) {
-				this.currentFrame = (this.currentFrame + 1) % maxFrames;
+				this.currentFrame++;
+				
+				// Check if idle-to-fly animation completed
+				if (this.transitionToFly && this.currentFrame >= maxFrames) {
+					this.currentAnimation = 'fly';
+					this.currentFrame = 0;
+					this.transitionToFly = false;
+				} else {
+					this.currentFrame = this.currentFrame % maxFrames;
+				}
 			}
 		}
 		

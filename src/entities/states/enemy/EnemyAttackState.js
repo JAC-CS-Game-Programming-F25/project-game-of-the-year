@@ -7,7 +7,8 @@ import EntityState from '../../../enums/EntityState.js';
 export default class EnemyAttackState extends State {
 	constructor() {
 		super();
-		this.attackDuration = 0.8; // seconds for attack animation
+		this.attackDuration = 1.2; // seconds for attack animation (8 frames * 0.12 = 0.96s + buffer)
+		this.attackCooldown = 1.5; // seconds before can attack again
 		this.attackTimer = 0;
 		this.hasDealtDamage = false;
 	}
@@ -32,34 +33,20 @@ export default class EnemyAttackState extends State {
 		const enemy = this.stateMachine.entity;
 		this.attackTimer += dt;
 		
-		// Deal damage at mid-point of attack animation
-		if (!this.hasDealtDamage && this.attackTimer >= this.attackDuration * 0.5) {
-			this.hasDealtDamage = true;
-			
-			// Check if player is still in range and deal damage
-			if (enemy.target && enemy.isPlayerInAttackRange(enemy.target)) {
-				// Damage will be handled by CollisionManager
-				// For now, just mark that we've attacked
-				enemy.attack();
-			}
-		}
+		// Damage is handled by CollisionManager based on animation frames
 		
-		// Attack complete
+		// Attack animation complete
 		if (this.attackTimer >= this.attackDuration) {
-			// Check if player is still in range for another attack
-			if (enemy.target && enemy.isPlayerInAttackRange(enemy.target)) {
-				// Attack again
-				this.stateMachine.change(EntityState.ATTACK);
-			} else if (enemy.target && enemy.detectPlayer(enemy.target)) {
-				// Chase player
+			// Set cooldown before next attack
+			enemy.lastAttackTime = Date.now();
+			
+			// Return to chasing (cooldown will prevent immediate re-attack)
+			if (enemy.target && enemy.detectPlayer(enemy.target)) {
 				this.stateMachine.change(EntityState.CHASE);
+			} else if (enemy.patrolPath.length > 0) {
+				this.stateMachine.change(EntityState.PATROL);
 			} else {
-				// Return to patrol or idle
-				if (enemy.patrolPath.length > 0) {
-					this.stateMachine.change(EntityState.PATROL);
-				} else {
-					this.stateMachine.change(EntityState.IDLE);
-				}
+				this.stateMachine.change(EntityState.IDLE);
 			}
 		}
 	}

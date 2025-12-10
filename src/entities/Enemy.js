@@ -16,10 +16,11 @@ export default class Enemy extends Entity {
 		
 		// AI behavior
 		this.target = null; // Player reference
-		this.patrolPath = []; // Array of {x, y} points
+		this.patrolPath = [];
 		this.currentPatrolIndex = 0;
 		this.patrolWaitTime = 0;
-		this.patrolWaitDuration = 1.0; // seconds to wait at each patrol point
+		this.patrolWaitDuration = 1.0;
+		this.lastAttackTime = 0; // Timestamp of last attack for cooldown
 		
 		// Movement
 		this.speed = 60; // pixels per second
@@ -110,8 +111,11 @@ export default class Enemy extends Entity {
 		const dy = this.target.y - this.y;
 		const distance = Math.sqrt(dx * dx + dy * dy);
 		
-		if (distance > 0) {
-			// Normalize direction and move
+		// Maintain minimum distance (don't overlap with player)
+		const minDistance = 50;
+		
+		if (distance > minDistance) {
+			// Move closer
 			const moveX = (dx / distance) * this.chaseSpeed * dt;
 			const moveY = (dy / distance) * this.chaseSpeed * dt;
 			
@@ -120,7 +124,15 @@ export default class Enemy extends Entity {
 			
 			// Update direction
 			this.direction = this.getDirectionToPlayer(this.target);
+		} else if (distance < minDistance - 10) {
+			// Too close! Back up
+			const moveX = (dx / distance) * this.chaseSpeed * dt * -0.3;
+			const moveY = (dy / distance) * this.chaseSpeed * dt * -0.3;
+			
+			this.x += moveX;
+			this.y += moveY;
 		}
+		// Else: at good distance, maintain position
 	}
 
 	/**

@@ -8,14 +8,19 @@ import GameStateName from '../../../enums/GameStateName.js';
 export default class PlayerDyingState extends State {
 	constructor() {
 		super();
-		this.deathAnimationDuration = 1.0; // seconds
+		this.deathAnimationDuration = 2.5; // seconds - longer to see full death animation
 		this.deathTimer = 0;
 	}
 
 	enter() {
-		this.deathTimer = this.deathAnimationDuration;
+		const player = this.stateMachine.entity;
+		this.deathTimer = 0;
+		player.readyForGameOver = false;
+		
 		// Set death animation
-		this.stateMachine.entity.setAnimation('death');
+		player.setAnimation('death');
+		
+		console.log('PlayerDyingState: Player is dying');
 	}
 
 	exit() {
@@ -23,12 +28,13 @@ export default class PlayerDyingState extends State {
 	}
 
 	update(dt, input) {
-		this.deathTimer -= dt;
+		const player = this.stateMachine.entity;
+		this.deathTimer += dt;
 		
-		// Death animation complete, trigger game over
-		if (this.deathTimer <= 0) {
-			// TODO: Transition to GameOverState
-			// This will be handled by PlayState when it detects player is dead
+		// Death animation complete
+		if (this.deathTimer >= this.deathAnimationDuration) {
+			player.readyForGameOver = true;
+			console.log('PlayerDyingState: Death animation complete, ready for GameOver');
 		}
 	}
 
