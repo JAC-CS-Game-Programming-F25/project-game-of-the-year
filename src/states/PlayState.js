@@ -112,11 +112,10 @@ export default class PlayState extends State {
 		// Ensure canvas has focus for input
 		canvas.focus();
 			
-			// Add click handler to focus canvas when clicked
-			canvas.addEventListener('click', () => {
-				canvas.focus();
-				console.log('Canvas clicked and focused');
-			});
+		// Add click handler to focus canvas when clicked
+		canvas.addEventListener('click', () => {
+			canvas.focus();
+		});
 		} catch (error) {
 			console.error('Error initializing PlayState:', error);
 			// Initialize with default values if map loading fails
@@ -140,16 +139,14 @@ export default class PlayState extends State {
 		// Player is at ~(335, 300), spawn enemies nearby but within bounds
 		const bat1 = Factory.createEnemy(EnemyType.ShadowBat, 500, 250);
 		const boxer1 = Factory.createEnemy(EnemyType.SpiritBoxer, 200, 400);
-		const boxer2 = Factory.createEnemy(EnemyType.SpiritBoxer, 600, 500);
+		const guardian1 = Factory.createEnemy(EnemyType.TempleGuardian, 400, 600);
 		
 		// Set player as target for all enemies
 		bat1.target = this.player;
 		boxer1.target = this.player;
-		boxer2.target = this.player;
+		guardian1.target = this.player;
 		
-		this.enemies.push(bat1, boxer1, boxer2);
-		
-		console.log('PlayState: Spawned 1 Shadow Bat, 2 Spirit Boxers at valid map positions');
+		this.enemies.push(bat1, boxer1, guardian1);
 	}
 
 	update(dt) {

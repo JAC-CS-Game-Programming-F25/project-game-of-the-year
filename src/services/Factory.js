@@ -1,6 +1,7 @@
 import EnemyType from '../enums/EnemyType.js';
 import ShadowBat from '../entities/ShadowBat.js';
 import SpiritBoxer from '../entities/SpiritBoxer.js';
+import TempleGuardian from '../entities/TempleGuardian.js';
 
 /**
  * Factory for creating enemies.
@@ -22,9 +23,8 @@ export default class Factory {
 			case EnemyType.SpiritBoxer:
 				return Factory.createSpiritBoxer(x, y);
 			
-			// TODO: Add Temple Guardian
-			// case EnemyType.TempleGuardian:
-			//     return Factory.createTempleGuardian(x, y);
+			case EnemyType.TempleGuardian:
+				return Factory.createTempleGuardian(x, y);
 			
 			default:
 				console.warn(`Unknown enemy type: ${type}`);
@@ -52,9 +52,14 @@ export default class Factory {
 		return new SpiritBoxer(x, y);
 	}
 	
-	// TODO: Add Temple Guardian
-	// static createTempleGuardian(x, y) {
-	//     return new TempleGuardian(x, y);
-	// }
+	/**
+	 * Create a Temple Guardian enemy (BOSS).
+	 * @param {number} x - X position
+	 * @param {number} y - Y position
+	 * @returns {TempleGuardian}
+	 */
+	static createTempleGuardian(x, y) {
+		return new TempleGuardian(x, y);
+	}
 }
 

@@ -197,6 +197,42 @@
 			"path": "./assets/Sprites/Spirit Boxer/Damaged & Death.png",
 			"width": 137,
 			"height": 528
+		},
+		{
+			"name": "temple-guardian-walk",
+			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/walk.png",
+			"width": 160,
+			"height": 472
+		},
+		{
+			"name": "temple-guardian-attack1",
+			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/attack 1 without VFX.png",
+			"width": 160,
+			"height": 649
+		},
+		{
+			"name": "temple-guardian-attack2",
+			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/Attack 2 without VFX.png",
+			"width": 160,
+			"height": 649
+		},
+		{
+			"name": "temple-guardian-special",
+			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/Special Without VFX.png",
+			"width": 160,
+			"height": 826
+		},
+		{
+			"name": "temple-guardian-hit",
+			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/hit.png",
+			"width": 160,
+			"height": 118
+		},
+		{
+			"name": "temple-guardian-death",
+			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/death.png",
+			"width": 160,
+			"height": 590
 		}
 	],
 	"fonts": [
