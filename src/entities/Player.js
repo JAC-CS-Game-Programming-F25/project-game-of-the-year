@@ -114,8 +114,7 @@ export default class Player extends Entity {
 			this.animation.update(dt);
 		}
 		
-		// Update hitbox position to match entity position
-		this.hitbox.set(this.x, this.y, this.width, this.height);
+		// Update hitbox position (Entity base class handles this now)
 	}
 	
 	/**

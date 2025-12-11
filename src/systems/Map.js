@@ -14,6 +14,7 @@ export default class Map {
 		this.tilesets = [];
 		this.layers = [];
 		this.collisionLayer = null;
+		this.exits = []; // Exit zones for map transitions
 		this.loaded = false;
 	}
 
@@ -62,12 +63,29 @@ export default class Map {
 			const layerElements = xmlDoc.querySelectorAll('layer');
 			for (const layerEl of layerElements) {
 				const layerName = layerEl.getAttribute('name');
+				const visible = layerEl.getAttribute('visible');
+				
+				// Skip invisible layers except collisions
+				if (visible === '0' && layerName.toLowerCase() !== 'collisions') {
+					continue;
+				}
+				
 				const layer = this.parseLayer(layerEl);
 				
 				if (layerName.toLowerCase() === 'collisions') {
 					this.collisionLayer = layer;
 				} else {
 					this.layers.push(layer);
+				}
+			}
+
+			// Parse object layers (exits)
+			const objectGroupElements = xmlDoc.querySelectorAll('objectgroup');
+			for (const objectGroupEl of objectGroupElements) {
+				const groupName = objectGroupEl.getAttribute('name');
+				
+				if (groupName && groupName.toLowerCase() === 'exits') {
+					this.parseExits(objectGroupEl);
 				}
 			}
 
@@ -129,7 +147,7 @@ export default class Map {
 		const graphic = this.images.get(imageName);
 		
 		if (!graphic) {
-			console.warn(`Tileset image "${imageName}" not found in Images. Make sure it's loaded in config.json`);
+			console.warn(`Tileset image "${imageName}" not found in Images. Check config.json`);
 		}
 
 		return {
@@ -216,6 +234,45 @@ export default class Map {
 			x: tileX * this.tileWidth,
 			y: tileY * this.tileHeight
 		};
+	}
+
+	/**
+	 * Parse exit objects from object layer
+	 */
+	parseExits(objectGroupElement) {
+		const objectElements = objectGroupElement.querySelectorAll('object');
+		
+		for (const objectEl of objectElements) {
+			const x = parseFloat(objectEl.getAttribute('x'));
+			const y = parseFloat(objectEl.getAttribute('y'));
+			const width = parseFloat(objectEl.getAttribute('width'));
+			const height = parseFloat(objectEl.getAttribute('height'));
+			
+			this.exits.push({
+				x: x,
+				y: y,
+				width: width,
+				height: height
+			});
+		}
+	}
+
+	/**
+	 * Check if a position overlaps with any exit zone
+	 */
+	checkExitCollision(x, y, width, height) {
+		for (let i = 0; i < this.exits.length; i++) {
+			const exit = this.exits[i];
+			
+			// AABB collision
+			if (x < exit.x + exit.width &&
+				x + width > exit.x &&
+				y < exit.y + exit.height &&
+				y + height > exit.y) {
+				return i; // Return exit index
+			}
+		}
+		return -1; // No collision
 	}
 
 	/**

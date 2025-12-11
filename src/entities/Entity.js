@@ -41,7 +41,13 @@ export default class Entity extends GameObject {
 		}
 		
 		// Update hitbox position to match entity position
-		this.hitbox.set(this.x, this.y, this.width, this.height);
+		// Entity (x, y) is center, Hitbox expects top-left corner
+		this.hitbox.set(
+			this.x - this.width / 2,
+			this.y - this.height / 2,
+			this.width,
+			this.height
+		);
 	}
 
 	render(ctx) {
