@@ -22,11 +22,25 @@ export default class MapManager {
 				exitIndex: 0 // Use first exit (entrance from Starting_map)
 			},
 			{
+				path: '/GoodMap.tmx',
+				name: 'Good Map',
+				// Use entrance exit as spawn
+				useExitAsSpawn: true,
+				exitIndex: 0 // Use first exit (entrance from map1)
+			},
+			{
 				path: '/terrainMapTiled.tmx',
 				name: 'Terrain Map',
 				// Use entrance exit as spawn
 				useExitAsSpawn: true,
-				exitIndex: 0 // Use first exit (entrance from map1)
+				exitIndex: 0 // Use first exit (entrance from GoodMap)
+			},
+			{
+				path: '/BossRoom.tmx',
+				name: 'Boss Room',
+				// Use entrance exit as spawn
+				useExitAsSpawn: true,
+				exitIndex: 0 // Use first exit (entrance from terrainMapTiled)
 			}
 		];
 		

@@ -118,47 +118,105 @@ export default class Map {
 	}
 
 	/**
-	 * Parse embedded tileset element
+	 * Parse embedded tileset element (handles both single-image and image-collection)
 	 */
 	parseEmbeddedTileset(tilesetEl, firstGid, tsxPath = null) {
+		const name = tilesetEl.getAttribute('name') || 'unnamed';
 		const tileWidth = parseInt(tilesetEl.getAttribute('tilewidth'));
 		const tileHeight = parseInt(tilesetEl.getAttribute('tileheight'));
-		const columns = parseInt(tilesetEl.getAttribute('columns'));
+		const tileCount = parseInt(tilesetEl.getAttribute('tilecount')) || 0;
+		const columns = parseInt(tilesetEl.getAttribute('columns')) || 0;
+		const margin = parseInt(tilesetEl.getAttribute('margin')) || 0;
+		const spacing = parseInt(tilesetEl.getAttribute('spacing')) || 0;
+		
+		// Check for single-image tileset
 		const imageEl = tilesetEl.querySelector('image');
 		
-		if (!imageEl) return null;
+		if (imageEl) {
+			// SINGLE-IMAGE TILESET (grid-based spritesheet)
+			let imageSource = imageEl.getAttribute('source');
+			
+			// Resolve path
+			if (tsxPath) {
+				const tsxDir = tsxPath.substring(0, tsxPath.lastIndexOf('/') + 1);
+				imageSource = tsxDir + imageSource;
+			} else {
+				const tmxDir = this.tmxPath.substring(0, this.tmxPath.lastIndexOf('/') + 1);
+				imageSource = tmxDir + imageSource;
+			}
 
-		let imageSource = imageEl.getAttribute('source');
-		
-		// If we have a TSX path, resolve relative to it
-		if (tsxPath) {
-			const tsxDir = tsxPath.substring(0, tsxPath.lastIndexOf('/') + 1);
-			imageSource = tsxDir + imageSource;
+			// Extract image name from path
+			const imageFileName = imageSource.split('/').pop();
+			const imageName = imageFileName.split('.')[0].toLowerCase().replace(/_/g, '-');
+			
+			const graphic = this.images.get(imageName);
+			
+			if (!graphic) {
+				console.warn(`Tileset image "${imageName}" not found in Images. Check config.json`);
+			}
+
+			return {
+				name,
+				firstGid,
+				tileWidth,
+				tileHeight,
+				columns,
+				tileCount,
+				margin,
+				spacing,
+				imageSource,
+				imageName,
+				graphic,
+				type: 'single-image'
+			};
 		} else {
-			// Resolve relative to TMX file
-			const tmxDir = this.tmxPath.substring(0, this.tmxPath.lastIndexOf('/') + 1);
-			imageSource = tmxDir + imageSource;
+			// IMAGE-COLLECTION TILESET (individual images per tile)
+			const tiles = {};
+			const tileElements = tilesetEl.querySelectorAll('tile');
+			
+			for (const tileEl of tileElements) {
+				const localId = parseInt(tileEl.getAttribute('id'));
+				const tileImageEl = tileEl.querySelector('image');
+				
+				if (tileImageEl) {
+					let imageSource = tileImageEl.getAttribute('source');
+					
+					// Resolve path
+					if (tsxPath) {
+						const tsxDir = tsxPath.substring(0, tsxPath.lastIndexOf('/') + 1);
+						imageSource = tsxDir + imageSource;
+					} else {
+						const tmxDir = this.tmxPath.substring(0, this.tmxPath.lastIndexOf('/') + 1);
+						imageSource = tmxDir + imageSource;
+					}
+					
+					const imageFileName = imageSource.split('/').pop();
+					const imageName = imageFileName.split('.')[0].toLowerCase().replace(/_/g, '-');
+					const graphic = this.images.get(imageName);
+					
+					if (!graphic) {
+						console.warn(`Tile image "${imageName}" not found in Images for tile ${localId}`);
+					}
+					
+					tiles[localId] = {
+						imageName,
+						graphic,
+						width: parseInt(tileImageEl.getAttribute('width')) || tileWidth,
+						height: parseInt(tileImageEl.getAttribute('height')) || tileHeight
+					};
+				}
+			}
+			
+			return {
+				name,
+				firstGid,
+				tileWidth,
+				tileHeight,
+				tileCount,
+				tiles,
+				type: 'image-collection'
+			};
 		}
-
-		// Extract image name from path
-		const imageFileName = imageSource.split('/').pop();
-		const imageName = imageFileName.split('.')[0].toLowerCase().replace(/_/g, '-');
-		
-		const graphic = this.images.get(imageName);
-		
-		if (!graphic) {
-			console.warn(`Tileset image "${imageName}" not found in Images. Check config.json`);
-		}
-
-		return {
-			firstGid,
-			tileWidth,
-			tileHeight,
-			columns,
-			imageSource,
-			imageName,
-			graphic
-		};
 	}
 
 	/**
@@ -187,17 +245,18 @@ export default class Map {
 	}
 
 	/**
-	 * Get the tileset for a given tile GID
+	 * Get the tileset for a given tile GID (Per Tiled spec: largest firstgid ≤ cleanGid)
 	 */
 	getTilesetForGid(gid) {
 		if (gid === 0) return null;
 		
+		let chosen = null;
 		for (const tileset of this.tilesets) {
-			if (gid >= tileset.firstGid) {
-				return tileset;
+			if (gid >= tileset.firstGid && (!chosen || tileset.firstGid > chosen.firstGid)) {
+				chosen = tileset;
 			}
 		}
-		return null;
+		return chosen;
 	}
 
 	/**
@@ -276,12 +335,18 @@ export default class Map {
 	}
 
 	/**
-	 * Render the map
+	 * Render the map (fully Tiled-compliant with flip flags and both tileset types)
 	 */
 	render(context, camera) {
 		if (!this.loaded) return;
 
-		// Calculate visible tile range based on camera
+		// Tiled flip flags per official spec
+		const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
+		const FLIPPED_VERTICALLY_FLAG   = 0x40000000;
+		const FLIPPED_DIAGONALLY_FLAG   = 0x20000000;
+		const HEX_ROTATE_FLAG           = 0x10000000;
+
+		// Calculate visible tile range
 		const startTileX = Math.max(0, Math.floor(camera.x / this.tileWidth) - 1);
 		const endTileX = Math.min(this.width - 1, Math.floor((camera.x + camera.width) / this.tileWidth) + 1);
 		const startTileY = Math.max(0, Math.floor(camera.y / this.tileHeight) - 1);
@@ -292,31 +357,115 @@ export default class Map {
 			for (let tileY = startTileY; tileY <= endTileY; tileY++) {
 				for (let tileX = startTileX; tileX <= endTileX; tileX++) {
 					const index = tileY * layer.width + tileX;
-					const gid = layer.tileData[index];
+					const rawGid = layer.tileData[index];
 
-					if (gid === 0 || gid === undefined) continue;
+					if (rawGid === 0 || rawGid === undefined) continue;
 
-					const tileset = this.getTilesetForGid(gid);
-					if (!tileset) continue;
+					// Step 1: Decode GID and extract flip flags
+					const gid = rawGid >>> 0; // Force unsigned 32-bit
+					const flippedHorizontally = (gid & FLIPPED_HORIZONTALLY_FLAG) !== 0;
+					const flippedVertically   = (gid & FLIPPED_VERTICALLY_FLAG)   !== 0;
+					const flippedDiagonally   = (gid & FLIPPED_DIAGONALLY_FLAG)   !== 0;
 
-					// Calculate local tile ID within the tileset
-					const localId = gid - tileset.firstGid;
-					
-					// Calculate source position in tileset image
-					const tilesPerRow = tileset.columns;
-					const sourceX = (localId % tilesPerRow) * tileset.tileWidth;
-					const sourceY = Math.floor(localId / tilesPerRow) * tileset.tileHeight;
+					// Clear all flag bits to get clean GID
+					const cleanGid = gid & ~(
+						FLIPPED_HORIZONTALLY_FLAG |
+						FLIPPED_VERTICALLY_FLAG |
+						FLIPPED_DIAGONALLY_FLAG |
+						HEX_ROTATE_FLAG
+					);
 
-					// Calculate destination position
+					if (cleanGid === 0) continue;
+
+					// Step 2: Find correct tileset
+					const tileset = this.getTilesetForGid(cleanGid);
+					if (!tileset) {
+						console.warn(`No tileset found for cleanGid ${cleanGid}`);
+						continue;
+					}
+
+					// Calculate local tile ID
+					const localId = cleanGid - tileset.firstGid;
+
+					// Step 3: Get source rect based on tileset type
+					let sourceImage = null;
+					let sx = 0, sy = 0, sw = this.tileWidth, sh = this.tileHeight;
+
+					if (tileset.type === 'single-image') {
+						// SINGLE-IMAGE TILESET: grid-based spritesheet
+						const graphic = this.images.get(tileset.imageName);
+						if (!graphic || !graphic.image || !graphic.image.complete) continue;
+
+						sourceImage = graphic.image;
+						
+						const margin = tileset.margin || 0;
+						const spacing = tileset.spacing || 0;
+						const cols = tileset.columns || 1;
+
+						const tileX_local = localId % cols;
+						const tileY_local = Math.floor(localId / cols);
+
+						sx = margin + tileX_local * (tileset.tileWidth + spacing);
+						sy = margin + tileY_local * (tileset.tileHeight + spacing);
+						sw = tileset.tileWidth;
+						sh = tileset.tileHeight;
+
+					} else if (tileset.type === 'image-collection') {
+						// IMAGE-COLLECTION TILESET: each tile has its own image
+						const tileInfo = tileset.tiles[localId];
+						if (!tileInfo || !tileInfo.graphic || !tileInfo.graphic.image) {
+							console.warn(`Tile ${localId} not found in image-collection tileset ${tileset.name}`);
+							continue;
+						}
+
+						sourceImage = tileInfo.graphic.image;
+						sx = 0;
+						sy = 0;
+						sw = tileInfo.width;
+						sh = tileInfo.height;
+					} else {
+						console.warn(`Unknown tileset type: ${tileset.type}`);
+						continue;
+					}
+
+					// Step 4: Draw with correct transforms
 					const destX = tileX * this.tileWidth - camera.x;
 					const destY = tileY * this.tileHeight - camera.y;
 
-					const graphic = this.images.get(tileset.imageName);
-					if (graphic && graphic.image && graphic.image.complete) {
+					if (flippedHorizontally || flippedVertically || flippedDiagonally) {
+						context.save();
+						context.translate(destX + this.tileWidth / 2, destY + this.tileHeight / 2);
+
+						let scaleX = 1;
+						let scaleY = 1;
+						let rotation = 0;
+
+						// Apply diagonal flip FIRST (90° rotation + horizontal flip)
+						if (flippedDiagonally) {
+							rotation = Math.PI / 2;
+							scaleX = -1; // Tiled's diagonal includes a horizontal flip
+						}
+
+						// Then apply H/V flips
+						if (flippedHorizontally) scaleX *= -1;
+						if (flippedVertically)   scaleY *= -1;
+
+						if (rotation !== 0) context.rotate(rotation);
+						context.scale(scaleX, scaleY);
+
 						context.drawImage(
-							graphic.image,
-							sourceX, sourceY,
-							tileset.tileWidth, tileset.tileHeight,
+							sourceImage,
+							sx, sy, sw, sh,
+							-this.tileWidth / 2, -this.tileHeight / 2,
+							this.tileWidth, this.tileHeight
+						);
+
+						context.restore();
+					} else {
+						// No flips, draw normally
+						context.drawImage(
+							sourceImage,
+							sx, sy, sw, sh,
 							destX, destY,
 							this.tileWidth, this.tileHeight
 						);
