@@ -74,10 +74,33 @@ export default class CollisionManager {
 			const distance = Math.sqrt(dx * dx + dy * dy);
 
 			if (distance <= this.player.attackRange) {
-				// Hit within range
-				const isHit = true;
+				// Calculate angle to enemy
+				const angleToEnemy = Math.atan2(dy, dx);
 				
-				if (isHit) {
+				// Get player's facing direction angle
+				const playerDirection = this.player.direction;
+				const directionAngles = {
+					'e': 0,
+					'se': Math.PI / 4,
+					's': Math.PI / 2,
+					'sw': 3 * Math.PI / 4,
+					'w': Math.PI,
+					'nw': -3 * Math.PI / 4,
+					'n': -Math.PI / 2,
+					'ne': -Math.PI / 4
+				};
+				const playerAngle = directionAngles[playerDirection] || 0;
+				
+				// Calculate angle difference (normalized to -PI to PI)
+				let angleDiff = angleToEnemy - playerAngle;
+				while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+				while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+				
+				// Check if enemy is in front arc (180 degrees = PI radians)
+				const attackArc = Math.PI; // Half circle in front
+				const isInFrontArc = Math.abs(angleDiff) <= attackArc / 2;
+				
+				if (isInFrontArc) {
 					// Hit!
 					enemy.takeDamage(this.player.attackDamage);
 					this.player.hasDealtDamage = true;
@@ -91,20 +114,19 @@ export default class CollisionManager {
 						enemy.y += knockbackY;
 					}
 
-				// Transition enemy state based on HP
-				if (enemy.isAlive()) {
-					// Still alive, transition to HIT state
-					if (enemy.stateMachine.currentState.name !== 'hit') {
-						enemy.stateMachine.change('hit');
+					// Transition enemy state based on HP
+					if (enemy.isAlive()) {
+						// Still alive, transition to HIT state
+						if (enemy.stateMachine.currentState.name !== 'hit') {
+							enemy.stateMachine.change('hit');
+						}
+					} else {
+						// Dead! Transition to DYING state
+						if (enemy.stateMachine.currentState.name !== 'dying') {
+							enemy.stateMachine.change('dying');
+							console.log('💀 Enemy killed!');
+						}
 					}
-				} else {
-					// Dead! Transition to DYING state
-					if (enemy.stateMachine.currentState.name !== 'dying') {
-						enemy.stateMachine.change('dying');
-						console.log('💀 Enemy killed!');
-					}
-				}
-
 				}
 			}
 		}
@@ -147,8 +169,9 @@ export default class CollisionManager {
 			const distance = Math.sqrt(dx * dx + dy * dy);
 
 			if (distance <= enemy.attackRange) {
-				// Hit!
-				this.player.takeDamage(enemy.attackDamage);
+				// Hit! Use getDamage() if available (for combo system)
+				const damage = enemy.getDamage ? enemy.getDamage() : (enemy.attackDamage || enemy.damage || 5);
+				this.player.takeDamage(damage);
 				attackState.hasDealtDamage = true;
 
 				// Check if player died

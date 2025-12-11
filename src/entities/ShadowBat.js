@@ -17,6 +17,7 @@ export default class ShadowBat extends Enemy {
 		this.detectionRange = 250;
 		this.speed = 100; // Fast flyer
 		this.chaseSpeed = 120;
+		this.minDistanceToPlayer = 50; // Hover at medium distance (flying enemy)
 		
 		// Sprite configuration (from shadow-bat-sprite.md)
 		this.frameWidth = 44;

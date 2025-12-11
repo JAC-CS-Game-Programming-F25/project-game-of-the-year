@@ -111,8 +111,8 @@ export default class Enemy extends Entity {
 		const dy = this.target.y - this.y;
 		const distance = Math.sqrt(dx * dx + dy * dy);
 		
-		// Maintain minimum distance (don't overlap with player)
-		const minDistance = 50;
+		// Use each enemy's specific minimum distance
+		const minDistance = this.minDistanceToPlayer;
 		
 		if (distance > minDistance) {
 			// Move closer

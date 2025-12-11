@@ -1,5 +1,6 @@
 import EnemyType from '../enums/EnemyType.js';
 import ShadowBat from '../entities/ShadowBat.js';
+import SpiritBoxer from '../entities/SpiritBoxer.js';
 
 /**
  * Factory for creating enemies.
@@ -18,9 +19,10 @@ export default class Factory {
 			case EnemyType.ShadowBat:
 				return Factory.createShadowBat(x, y);
 			
-			// TODO: Add other enemy types
-			// case EnemyType.SpiritBoxer:
-			//     return Factory.createSpiritBoxer(x, y);
+			case EnemyType.SpiritBoxer:
+				return Factory.createSpiritBoxer(x, y);
+			
+			// TODO: Add Temple Guardian
 			// case EnemyType.TempleGuardian:
 			//     return Factory.createTempleGuardian(x, y);
 			
@@ -40,11 +42,17 @@ export default class Factory {
 		return new ShadowBat(x, y);
 	}
 
-	// TODO: Add factory methods for other enemy types
-	// static createSpiritBoxer(x, y) {
-	//     return new SpiritBoxer(x, y);
-	// }
+	/**
+	 * Create a Spirit Boxer enemy.
+	 * @param {number} x - X position
+	 * @param {number} y - Y position
+	 * @returns {SpiritBoxer}
+	 */
+	static createSpiritBoxer(x, y) {
+		return new SpiritBoxer(x, y);
+	}
 	
+	// TODO: Add Temple Guardian
 	// static createTempleGuardian(x, y) {
 	//     return new TempleGuardian(x, y);
 	// }

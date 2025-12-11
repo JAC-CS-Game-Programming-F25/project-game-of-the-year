@@ -161,6 +161,42 @@
 			"path": "./assets/Sprites/Bat/hit and death.png",
 			"width": 308,
 			"height": 92
+		},
+		{
+			"name": "spirit-boxer-idle",
+			"path": "./assets/Sprites/Spirit Boxer/Idle.png",
+			"width": 137,
+			"height": 176
+		},
+		{
+			"name": "spirit-boxer-attack1",
+			"path": "./assets/Sprites/Spirit Boxer/attack 1.png",
+			"width": 137,
+			"height": 264
+		},
+		{
+			"name": "spirit-boxer-attack2",
+			"path": "./assets/Sprites/Spirit Boxer/attack 2.png",
+			"width": 137,
+			"height": 572
+		},
+		{
+			"name": "spirit-boxer-attack3",
+			"path": "./assets/Sprites/Spirit Boxer/attack 3.png",
+			"width": 137,
+			"height": 440
+		},
+		{
+			"name": "spirit-boxer-run",
+			"path": "./assets/Sprites/Spirit Boxer/Run.png",
+			"width": 137,
+			"height": 264
+		},
+		{
+			"name": "spirit-boxer-damaged-death",
+			"path": "./assets/Sprites/Spirit Boxer/Damaged & Death.png",
+			"width": 137,
+			"height": 528
 		}
 	],
 	"fonts": [

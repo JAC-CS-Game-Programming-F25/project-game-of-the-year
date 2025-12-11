@@ -136,19 +136,20 @@ export default class PlayState extends State {
 	spawnTestEnemies() {
 		if (!this.player) return;
 		
-		// Spawn 2-3 Shadow Bats further away so idle animation is visible
-		const bat1 = Factory.createEnemy(EnemyType.ShadowBat, this.player.x + 400, this.player.y - 200);
-		const bat2 = Factory.createEnemy(EnemyType.ShadowBat, this.player.x - 400, this.player.y + 200);
-		const bat3 = Factory.createEnemy(EnemyType.ShadowBat, this.player.x + 300, this.player.y + 350);
+		// Spawn test enemies within map bounds (800x800)
+		// Player is at ~(335, 300), spawn enemies nearby but within bounds
+		const bat1 = Factory.createEnemy(EnemyType.ShadowBat, 500, 250);
+		const boxer1 = Factory.createEnemy(EnemyType.SpiritBoxer, 200, 400);
+		const boxer2 = Factory.createEnemy(EnemyType.SpiritBoxer, 600, 500);
 		
-		// Set player as target for all bats
+		// Set player as target for all enemies
 		bat1.target = this.player;
-		bat2.target = this.player;
-		bat3.target = this.player;
+		boxer1.target = this.player;
+		boxer2.target = this.player;
 		
-		this.enemies.push(bat1, bat2, bat3);
+		this.enemies.push(bat1, boxer1, boxer2);
 		
-		console.log('PlayState: Spawned', this.enemies.length, 'Shadow Bats (detection range: 250px)');
+		console.log('PlayState: Spawned 1 Shadow Bat, 2 Spirit Boxers at valid map positions');
 	}
 
 	update(dt) {
