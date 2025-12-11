@@ -1,6 +1,7 @@
 import State from "../../lib/State.js";
 import Map from "../systems/Map.js";
 import Camera from "../systems/Camera.js";
+import MapManager from "../systems/MapManager.js";
 import CollisionManager from "../systems/CollisionManager.js";
 import Player from "../entities/Player.js";
 import Direction from "../enums/Direction.js";
@@ -18,15 +19,29 @@ export default class PlayState extends State {
 		this.player = null;
 		this.enemies = [];
 		this.collisionManager = new CollisionManager();
+		this.mapManager = new MapManager();
+		this.isTransitioning = false;
+		this.transitionCooldown = 0; // Prevent immediate re-trigger
 	}
 
 	async enter() {
-		try {
-			// Initialize camera
-			this.camera = new Camera(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		await this.loadCurrentMap();
+	}
 
-			// Load map (path from root of project)
-			this.map = new Map('/Starting_map.tmx', images);
+	/**
+	 * Load the current map from MapManager
+	 */
+	async loadCurrentMap() {
+		try {
+			const mapConfig = this.mapManager.getCurrentMap();
+			
+			// Initialize camera if not exists
+			if (!this.camera) {
+				this.camera = new Camera(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+			}
+
+			// Load map
+			this.map = new Map(mapConfig.path, images);
 			await this.map.load();
 
 			// Set camera bounds based on map size
@@ -34,35 +49,68 @@ export default class PlayState extends State {
 			const mapHeight = this.map.height * this.map.tileHeight;
 			this.camera.setBounds(mapWidth, mapHeight);
 
-			// Initialize player at starting position (center of map for now)
-			const startX = mapWidth / 2;
-			const startY = mapHeight / 2;
-			this.player = new Player(startX, startY, 32, 32);
-			this.player.direction = Direction.S;
+			// Determine spawn position
+			let spawnX, spawnY;
 			
-			// Spawn test enemies (Shadow Bats)
+			if (mapConfig.useExitAsSpawn && this.map.exits.length > 0) {
+				// Use exit zone as spawn point
+				const exitIndex = mapConfig.exitIndex || 0;
+				const entrance = this.map.exits[exitIndex];
+				if (entrance) {
+					// Spawn at center of exit zone, offset inward by 50px to avoid walls
+					spawnX = entrance.x + entrance.width / 2;
+					spawnY = entrance.y + entrance.height / 2;
+					
+					// Offset spawn position inward from exit to avoid walls
+					if (entrance.x > 700) {
+						spawnX -= 70;
+					} else if (entrance.y > 700) {
+						spawnY -= 80;
+					}
+				} else {
+					spawnX = mapConfig.spawnX || 200;
+					spawnY = mapConfig.spawnY || 200;
+				}
+			} else {
+				spawnX = mapConfig.spawnX || 200;
+				spawnY = mapConfig.spawnY || 200;
+			}
+			
+			// Initialize or reposition player at spawn point
+			if (!this.player) {
+				this.player = new Player(spawnX, spawnY, 28, 36); // Taller hitbox to cover body
+				this.player.direction = Direction.S;
+			} else {
+				// Reposition existing player
+				this.player.x = spawnX;
+				this.player.y = spawnY;
+			}
+			
+			// Clear and spawn enemies for this map
+			this.enemies = [];
 			this.spawnTestEnemies();
 			
 			// Initialize collision manager
+			if (!this.collisionManager) {
+				this.collisionManager = new CollisionManager();
+			}
 			this.collisionManager.setPlayer(this.player);
 			this.collisionManager.setEnemies(this.enemies);
-
-			// Set camera bounds (this will center if map is smaller than canvas)
-			this.camera.setBounds(mapWidth, mapHeight);
 			
 			// Set camera to follow player
 			this.camera.setTarget(this.player);
 			
-			// If map is bigger than canvas, center camera on player
-			// If map is smaller, setBounds already centered it
+			// Center camera on player
 			if (mapWidth >= CANVAS_WIDTH && mapHeight >= CANVAS_HEIGHT) {
-				this.camera.position.x = Math.max(0, Math.min(startX - CANVAS_WIDTH / 2, mapWidth - CANVAS_WIDTH));
-				this.camera.position.y = Math.max(0, Math.min(startY - CANVAS_HEIGHT / 2, mapHeight - CANVAS_HEIGHT));
+				this.camera.position.x = Math.max(0, Math.min(spawnX - CANVAS_WIDTH / 2, mapWidth - CANVAS_WIDTH));
+				this.camera.position.y = Math.max(0, Math.min(spawnY - CANVAS_HEIGHT / 2, mapHeight - CANVAS_HEIGHT));
 			}
 			
-			// Ensure canvas has focus for input
-			canvas.focus();
-			console.log('PlayState: Canvas focused, input should work');
+			this.isTransitioning = false;
+			this.transitionCooldown = 1.0; // 1 second cooldown after map load
+			
+		// Ensure canvas has focus for input
+		canvas.focus();
 			
 			// Add click handler to focus canvas when clicked
 			canvas.addEventListener('click', () => {
@@ -104,18 +152,6 @@ export default class PlayState extends State {
 	}
 
 	update(dt) {
-		// Debug: Check if input is working
-		if (input && (input.isKeyHeld(Input.KEYS.W) || input.isKeyHeld(Input.KEYS.A) || input.isKeyHeld(Input.KEYS.S) || input.isKeyHeld(Input.KEYS.D))) {
-			if (!this._inputDebugLogged) {
-				console.log('PlayState: Input detected!', {
-					w: input.isKeyHeld(Input.KEYS.W),
-					a: input.isKeyHeld(Input.KEYS.A),
-					s: input.isKeyHeld(Input.KEYS.S),
-					d: input.isKeyHeld(Input.KEYS.D)
-				});
-				this._inputDebugLogged = true;
-			}
-		}
 		
 		// Store player's previous position for collision checking
 		let prevX = 0;
@@ -158,6 +194,16 @@ export default class PlayState extends State {
 		if (this.player && this.player.stateMachine.currentState.name === 'dying' && this.player.readyForGameOver) {
 			stateMachine.change(GameStateName.GameOver);
 			return;
+		}
+
+		// Update transition cooldown
+		if (this.transitionCooldown > 0) {
+			this.transitionCooldown -= dt;
+		}
+		
+		// Check for exit collisions (map transitions)
+		if (!this.isTransitioning && this.transitionCooldown <= 0 && this.player && this.map && this.map.loaded) {
+			this.checkExitCollisions();
 		}
 
 		// Update camera
@@ -204,8 +250,8 @@ export default class PlayState extends State {
 	}
 
 	render(context) {
-		// Clear canvas with a dark background color (instead of black)
-		context.fillStyle = '#1a1a2e'; // Dark blue-grey background
+		// Clear canvas with a dark background color
+		context.fillStyle = '#000000'; // Black background
 		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 		
 		// Ensure canvas has focus for input
@@ -279,5 +325,72 @@ export default class PlayState extends State {
 		context.font = '14px Arial';
 		context.textAlign = 'left';
 		context.fillText(`HP: ${Math.ceil(this.player.hp)} / ${this.player.maxHp}`, barX + 5, barY + 15);
+	}
+
+	/**
+	 * Check if player touches any exit zones
+	 */
+	checkExitCollisions() {
+		const exitIndex = this.map.checkExitCollision(
+			this.player.x - this.player.width / 2,
+			this.player.y - this.player.height / 2,
+			this.player.width,
+			this.player.height
+		);
+
+		if (exitIndex !== -1) {
+			
+			// Exit logic:
+			// First map (Starting_map): only has 1 exit -> goes forward
+			// Middle maps (GoodMap): exit 0 = entrance (ignore), exit 1 = forward
+			// Last map (terrainMapTiled): exit 0 = entrance (ignore), exit 1 = forward to victory
+			
+			const isFirstMap = this.mapManager.currentMapIndex === 0;
+			
+			if (isFirstMap) {
+				// Starting map: only 1 exit, goes forward
+				this.transitionToNextMap();
+			} else {
+				// Other maps: exit 0 = entrance (ignore), exit 1 = forward
+				if (exitIndex === 1) {
+					this.transitionToNextMap();
+				}
+				// Exit 0 is the entrance, do nothing
+			}
+		}
+	}
+
+	/**
+	 * Transition to next map
+	 */
+	async transitionToNextMap() {
+		if (this.isTransitioning) return;
+		
+		this.isTransitioning = true;
+		
+		const nextMap = this.mapManager.goToNextMap();
+		
+		if (nextMap) {
+			await this.loadCurrentMap();
+		} else {
+			stateMachine.change(GameStateName.Victory);
+		}
+	}
+
+	/**
+	 * Transition to previous map
+	 */
+	async transitionToPreviousMap() {
+		if (this.isTransitioning) return;
+		
+		this.isTransitioning = true;
+		
+		const prevMap = this.mapManager.goToPreviousMap();
+		
+		if (prevMap) {
+			await this.loadCurrentMap();
+		} else {
+			this.isTransitioning = false;
+		}
 	}
 }

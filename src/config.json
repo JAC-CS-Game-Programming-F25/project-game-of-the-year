@@ -13,6 +13,18 @@
 			"height": 704
 		},
 		{
+			"name": "water-coasts",
+			"path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Water_coasts.png",
+			"width": 1056,
+			"height": 256
+		},
+		{
+			"name": "water-detilazation",
+			"path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/water_detilazation.png",
+			"width": 688,
+			"height": 576
+		},
+		{
 			"name": "temple",
 			"path": "./assets/Sprites/DARK - Temple Guardians/Temple/Temple.png",
 			"width": 135,

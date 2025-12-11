@@ -107,8 +107,7 @@ export default class ShadowBat extends Enemy {
 			this.stateMachine.update(dt);
 		}
 		
-		// Update hitbox
-		this.hitbox.set(this.x, this.y, this.width, this.height);
+		// Update hitbox (Entity base class handles this now)
 	}
 
 	render(ctx, images) {

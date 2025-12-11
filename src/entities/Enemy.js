@@ -193,8 +193,7 @@ export default class Enemy extends Entity {
 			this.animation.update(dt);
 		}
 		
-		// Update hitbox position
-		this.hitbox.set(this.x, this.y, this.width, this.height);
+		// Update hitbox position (Entity base class handles this now)
 	}
 
 	/**
