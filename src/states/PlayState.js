@@ -86,9 +86,9 @@ export default class PlayState extends State {
 				this.player.y = spawnY;
 			}
 			
-			// Clear and spawn enemies for this map
-			this.enemies = [];
-			this.spawnTestEnemies();
+		// Clear and spawn enemies for this map
+		this.enemies = [];
+		this.spawnEnemiesForMap(mapConfig.path);
 			
 			// Initialize collision manager
 			if (!this.collisionManager) {
@@ -130,23 +130,88 @@ export default class PlayState extends State {
 	}
 
 	/**
-	 * Spawn test enemies for development.
+	 * Spawn enemies based on the current map.
 	 */
-	spawnTestEnemies() {
+	spawnEnemiesForMap(mapPath) {
 		if (!this.player) return;
 		
-		// Spawn test enemies within map bounds (800x800)
-		// Player is at ~(335, 300), spawn enemies nearby but within bounds
-		const bat1 = Factory.createEnemy(EnemyType.ShadowBat, 500, 250);
-		const boxer1 = Factory.createEnemy(EnemyType.SpiritBoxer, 200, 400);
-		const guardian1 = Factory.createEnemy(EnemyType.TempleGuardian, 400, 600);
+		const spawned = [];
 		
-		// Set player as target for all enemies
-		bat1.target = this.player;
-		boxer1.target = this.player;
-		guardian1.target = this.player;
+		switch(mapPath) {
+			case '/Starting_map.tmx':
+				// Starting zone - A few bats in corners
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 100, 100));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 700, 100));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 100, 700));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 700, 700));
+				break;
+				
+			case '/map1.tmx':
+				// Map 1 - 5 bats spread out + 1 Spirit Boxer near top-left
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 150, 250));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 400, 200));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 650, 300));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 250, 500));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 550, 550));
+				spawned.push(Factory.createEnemy(EnemyType.SpiritBoxer, 200, 150));
+				break;
+				
+			case '/GoodMap.tmx':
+				// Good Map - Lots of bats everywhere, spread out, some in water
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 200, 300));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 400, 250));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 600, 300));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 150, 450));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 350, 450));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 550, 450));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 250, 600));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 450, 600));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 650, 600));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 300, 750));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 500, 750));
+				break;
+				
+			case '/map2.tmx':
+				// Map 2 - Couple Spirit Boxers in front of EXIT (top), bats around
+				spawned.push(Factory.createEnemy(EnemyType.SpiritBoxer, 300, 120));
+				spawned.push(Factory.createEnemy(EnemyType.SpiritBoxer, 500, 120));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 150, 300));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 650, 300));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 300, 450));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 500, 450));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 400, 600));
+				break;
+				
+			case '/terrainMapTiled.tmx':
+				// Terrain Map - Lots of bats at far left and right extremities (black space)
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 50, 200));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 50, 350));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 50, 500));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 50, 650));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 750, 200));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 750, 350));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 750, 500));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 750, 650));
+				break;
+				
+			case '/BossRoom.tmx':
+				// Boss Room - Temple Guardian at top + few bats
+				spawned.push(Factory.createEnemy(EnemyType.TempleGuardian, 400, 150));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 250, 300));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 550, 300));
+				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 400, 450));
+				break;
+				
+			default:
+				break;
+		}
 		
-		this.enemies.push(bat1, boxer1, guardian1);
+		// Set player as target for all spawned enemies
+		for (const enemy of spawned) {
+			enemy.target = this.player;
+		}
+		
+		this.enemies.push(...spawned);
 	}
 
 	update(dt) {
@@ -337,23 +402,11 @@ export default class PlayState extends State {
 		);
 
 		if (exitIndex !== -1) {
+			const currentMapConfig = this.mapManager.getCurrentMap();
+			const forwardExitIndex = currentMapConfig.forwardExitIndex;
 			
-			// Exit logic:
-			// First map (Starting_map): only has 1 exit -> goes forward
-			// Middle maps (GoodMap): exit 0 = entrance (ignore), exit 1 = forward
-			// Last map (terrainMapTiled): exit 0 = entrance (ignore), exit 1 = forward to victory
-			
-			const isFirstMap = this.mapManager.currentMapIndex === 0;
-			
-			if (isFirstMap) {
-				// Starting map: only 1 exit, goes forward
+			if (exitIndex === forwardExitIndex) {
 				this.transitionToNextMap();
-			} else {
-				// Other maps: exit 0 = entrance (ignore), exit 1 = forward
-				if (exitIndex === 1) {
-					this.transitionToNextMap();
-				}
-				// Exit 0 is the entrance, do nothing
 			}
 		}
 	}

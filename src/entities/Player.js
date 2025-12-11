@@ -17,10 +17,10 @@ export default class Player extends Entity {
 		this.attackDamage = 10;
 		this.attackRange = 80; // Large range for testing
 		this.dodgeSpeed = 200;
-		this.dodgeDuration = 0.3; // seconds
+		this.dodgeDuration = 0.3;
 		this.invincibilityTimer = 0;
-		this.invincibilityDuration = 0.8; // seconds (shorter for faster gameplay)
-		this.hasDealtDamage = false; // Reset each attack
+		this.invincibilityDuration = 0.15;
+		this.hasDealtDamage = false;
 		
 		// Movement
 		this.speed = 100; // pixels per second

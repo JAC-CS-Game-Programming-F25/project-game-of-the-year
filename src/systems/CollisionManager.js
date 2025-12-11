@@ -56,8 +56,14 @@ export default class CollisionManager {
 				continue;
 			}
 
+			// Spirit Boxer uses offset positioning
+			let enemyY = enemy.y;
+			if (enemy.constructor.name === 'SpiritBoxer') {
+				enemyY = enemy.y - 50;
+			}
+
 			const dx = enemy.x - this.player.x;
-			const dy = enemy.y - this.player.y;
+			const dy = enemyY - this.player.y;
 			const distance = Math.sqrt(dx * dx + dy * dy);
 
 			if (distance <= this.player.attackRange) {
@@ -125,18 +131,54 @@ export default class CollisionManager {
 			
 			const currentFrame = enemy.currentFrame || 0;
 			const totalFrames = enemy.animationFrames ? enemy.animationFrames[enemy.currentAnimation] : 8;
-			const damageStartFrame = Math.floor(totalFrames * 0.5);
-			const damageEndFrame = Math.floor(totalFrames * 0.9);
+			
+			// Later damage timing for longer attacks
+			let damageStartPercent = 0.6;
+			let damageEndPercent = 0.85;
+			
+			if (totalFrames >= 12) {
+				// Long attacks (like boxer attack2/attack3) - damage near the end
+				damageStartPercent = 0.7;
+				damageEndPercent = 0.9;
+			}
+			
+			const damageStartFrame = Math.floor(totalFrames * damageStartPercent);
+			const damageEndFrame = Math.floor(totalFrames * damageEndPercent);
 			
 			if (currentFrame < damageStartFrame || currentFrame > damageEndFrame) {
 				continue;
 			}
 
+			// Spirit Boxer uses offset positioning
+			let playerY = this.player.y;
+			if (enemy.constructor.name === 'SpiritBoxer') {
+				playerY = this.player.y + 50;
+			}
+			
 			const dx = this.player.x - enemy.x;
-			const dy = this.player.y - enemy.y;
+			const dy = playerY - enemy.y;
 			const distance = Math.sqrt(dx * dx + dy * dy);
 
 			if (distance <= enemy.attackRange) {
+				// Check if enemy has directional attacks (like Spirit Boxer)
+				if (enemy.shouldFlipSprite) {
+					const isFacingLeft = enemy.shouldFlipSprite(this.player);
+					const playerIsToLeft = dx < 0;
+					const playerIsToRight = dx > 0;
+					
+					// Only hit if player is in front of the enemy
+					if ((isFacingLeft && !playerIsToLeft) || (!isFacingLeft && !playerIsToRight)) {
+						continue;
+					}
+					
+					// Also check vertical angle (not too far above/below)
+					const angle = Math.abs(Math.atan2(dy, dx));
+					const maxVerticalAngle = Math.PI / 3; // 60 degrees
+					if (angle > maxVerticalAngle && angle < (Math.PI - maxVerticalAngle)) {
+						continue;
+					}
+				}
+				
 				const damage = enemy.getDamage ? enemy.getDamage() : (enemy.attackDamage || enemy.damage || 5);
 				this.player.takeDamage(damage);
 				attackState.hasDealtDamage = true;

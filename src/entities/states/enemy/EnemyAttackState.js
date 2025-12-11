@@ -42,6 +42,17 @@ export default class EnemyAttackState extends State {
 				enemy.activateBuff();
 			}
 			
+			// Check if Spirit Boxer should immediately combo
+			if (enemy.shouldComboImmediately && enemy.shouldComboImmediately()) {
+				// Chain into next attack immediately (no cooldown)
+				this.attackTimer = 0;
+				this.hasDealtDamage = false;
+				if (enemy.setAnimation) {
+					enemy.setAnimation('attack');
+				}
+				return;
+			}
+			
 			enemy.lastAttackTime = Date.now();
 			
 			if (enemy.target && enemy.detectPlayer(enemy.target)) {

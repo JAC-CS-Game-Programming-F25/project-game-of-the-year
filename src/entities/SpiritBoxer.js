@@ -58,6 +58,8 @@ export default class SpiritBoxer extends Enemy {
 		this.currentComboAttack = 1;
 		this.comboResetTime = 2.5;
 		this.lastComboTime = 0;
+		this.isInComboChain = false;
+		this.comboChainChance = 0.25;
 		
 		// State machine
 		this.stateMachine = new EnemyStateMachine(this);
@@ -77,6 +79,11 @@ export default class SpiritBoxer extends Enemy {
 			
 			if (animationName === 'attack') {
 				this.advanceCombo();
+				
+				// Chance to start a combo chain
+				if (this.currentComboAttack === 1 && Math.random() < this.comboChainChance) {
+					this.isInComboChain = true;
+				}
 			}
 		}
 	}
@@ -87,7 +94,12 @@ export default class SpiritBoxer extends Enemy {
 		this.currentComboAttack++;
 		if (this.currentComboAttack > 3) {
 			this.currentComboAttack = 1;
+			this.isInComboChain = false;
 		}
+	}
+	
+	shouldComboImmediately() {
+		return this.isInComboChain && this.currentComboAttack < 3;
 	}
 	
 	getDamage() {
@@ -99,6 +111,18 @@ export default class SpiritBoxer extends Enemy {
 		}
 	}
 	
+	isPlayerInAttackRange(player) {
+		if (!player) return false;
+		
+		// Use same offset as chase for consistency
+		const targetY = player.y + 50;
+		const dx = player.x - this.x;
+		const dy = targetY - this.y;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+		
+		return distance <= this.attackRange;
+	}
+	
 	isPlayerToRight(player) {
 		return true;
 	}
@@ -107,6 +131,49 @@ export default class SpiritBoxer extends Enemy {
 		return player && player.x < this.x;
 	}
 	
+	chase(dt) {
+		if (!this.target) return;
+		
+		// Offset target position down so boxer aligns better
+		const targetY = this.target.y + 50;
+		
+		const dx = this.target.x - this.x;
+		const dy = targetY - this.y;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+		const minDistance = this.minDistanceToPlayer;
+		
+		const verticalDistance = Math.abs(dy);
+		const verticalThreshold = 30;
+		
+		if (distance > minDistance) {
+			let moveX = 0;
+			let moveY = 0;
+			
+			// PRIORITY: Get on the same horizontal line (same Y position)
+			if (verticalDistance > verticalThreshold) {
+				// Focus almost entirely on vertical movement to align Y positions
+				moveX = (dx / distance) * this.chaseSpeed * dt * 0.2;
+				moveY = (dy / distance) * this.chaseSpeed * dt * 1.8;
+			} else {
+				// Already aligned vertically, now close horizontal distance
+				moveX = (dx / distance) * this.chaseSpeed * dt;
+				moveY = (dy / distance) * this.chaseSpeed * dt * 0.2;
+			}
+			
+			this.x += moveX;
+			this.y += moveY;
+			
+			this.direction = this.getDirectionToPlayer(this.target);
+		} else if (distance < minDistance - 10) {
+			// Too close, back up
+			const moveX = (dx / distance) * this.chaseSpeed * dt * -0.3;
+			const moveY = (dy / distance) * this.chaseSpeed * dt * -0.3;
+			
+			this.x += moveX;
+			this.y += moveY;
+		}
+	}
+
 	update(dt) {
 		this.frameTime += dt;
 		if (this.frameTime >= this.frameInterval) {

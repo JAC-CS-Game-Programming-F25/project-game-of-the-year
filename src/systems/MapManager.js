@@ -6,42 +6,49 @@ export default class MapManager {
 		// Map progression order
 		// Spawn points will be determined by exit zones in each map
 		this.maps = [
-			{
-				path: '/Starting_map.tmx',
-				name: 'Starting Map',
-				// First map - spawn at center
-				useExitAsSpawn: false,
-				spawnX: 335,
-				spawnY: 300
-			},
-			{
-				path: '/map1.tmx',
-				name: 'Map 1',
-				// Use entrance exit (first exit) as spawn
-				useExitAsSpawn: true,
-				exitIndex: 0 // Use first exit (entrance from Starting_map)
-			},
-			{
-				path: '/GoodMap.tmx',
-				name: 'Good Map',
-				// Use entrance exit as spawn
-				useExitAsSpawn: true,
-				exitIndex: 0 // Use first exit (entrance from map1)
-			},
-			{
-				path: '/terrainMapTiled.tmx',
-				name: 'Terrain Map',
-				// Use entrance exit as spawn
-				useExitAsSpawn: true,
-				exitIndex: 0 // Use first exit (entrance from GoodMap)
-			},
-			{
-				path: '/BossRoom.tmx',
-				name: 'Boss Room',
-				// Use entrance exit as spawn
-				useExitAsSpawn: true,
-				exitIndex: 0 // Use first exit (entrance from terrainMapTiled)
-			}
+		{
+			path: '/Starting_map.tmx',
+			name: 'Starting Map',
+			useExitAsSpawn: false,
+			spawnX: 335,
+			spawnY: 300,
+			forwardExitIndex: 0
+		},
+		{
+			path: '/map1.tmx',
+			name: 'Map 1',
+			useExitAsSpawn: true,
+			exitIndex: 0,
+			forwardExitIndex: 1
+		},
+		{
+			path: '/GoodMap.tmx',
+			name: 'Good Map',
+			useExitAsSpawn: true,
+			exitIndex: 0,
+			forwardExitIndex: 1
+		},
+		{
+			path: '/map2.tmx',
+			name: 'Map 2',
+			useExitAsSpawn: true,
+			exitIndex: 1,
+			forwardExitIndex: 0
+		},
+		{
+			path: '/terrainMapTiled.tmx',
+			name: 'Terrain Map',
+			useExitAsSpawn: true,
+			exitIndex: 0,
+			forwardExitIndex: 1
+		},
+		{
+			path: '/BossRoom.tmx',
+			name: 'Boss Room',
+			useExitAsSpawn: true,
+			exitIndex: 0,
+			forwardExitIndex: -1
+		}
 		];
 		
 		this.currentMapIndex = 0;
