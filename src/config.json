@@ -1,59 +1,59 @@
 {
     "images": [
-        {
-            "name": "cutscene-0",
-            "path": "./Cutscene0.png",
-            "width": 0,
-            "height": 0
-        },
-        {
-            "name": "cutscene-1",
-            "path": "./Cutscene1.png",
-            "width": 0,
-            "height": 0
-        },
-        {
-            "name": "cutscene-2",
-            "path": "./Cutscene2.png",
-            "width": 0,
-            "height": 0
-        },
-        {
-            "name": "cutscene-3",
-            "path": "./Cutscene3.png",
-            "width": 0,
-            "height": 0
-        },
-        {
-            "name": "cutscene-4",
-            "path": "./Cutscene4.png",
-            "width": 0,
-            "height": 0
-        },
-        {
-            "name": "cutscene-5",
-            "path": "./Cutscene5.png",
-            "width": 0,
-            "height": 0
-        },
-        {
-            "name": "post-victory-cutscene",
-            "path": "./PostVictoryCutScene.png",
-            "width": 0,
-            "height": 0
-        },
-        {
-            "name": "victory-scene",
-            "path": "./VictoryScene.png",
-            "width": 0,
-            "height": 0
-        },
-        {
-            "name": "game-over-bg",
-            "path": "./GameOverImage.png",
-            "width": 0,
-            "height": 0
-        },
+	{
+		"name": "cutscene-0",
+		"path": "./assets/images/ui/Cutscene0.png",
+		"width": 0,
+		"height": 0
+	},
+	{
+		"name": "cutscene-1",
+		"path": "./assets/images/ui/Cutscene1.png",
+		"width": 0,
+		"height": 0
+	},
+	{
+		"name": "cutscene-2",
+		"path": "./assets/images/ui/Cutscene2.png",
+		"width": 0,
+		"height": 0
+	},
+	{
+		"name": "cutscene-3",
+		"path": "./assets/images/ui/Cutscene3.png",
+		"width": 0,
+		"height": 0
+	},
+	{
+		"name": "cutscene-4",
+		"path": "./assets/images/ui/Cutscene4.png",
+		"width": 0,
+		"height": 0
+	},
+	{
+		"name": "cutscene-5",
+		"path": "./assets/images/ui/Cutscene5.png",
+		"width": 0,
+		"height": 0
+	},
+	{
+		"name": "post-victory-cutscene",
+		"path": "./assets/images/ui/PostVictoryCutScene.png",
+		"width": 0,
+		"height": 0
+	},
+	{
+		"name": "victory-scene",
+		"path": "./assets/images/ui/VictoryScene.png",
+		"width": 0,
+		"height": 0
+	},
+	{
+		"name": "game-over-bg",
+		"path": "./assets/images/ui/GameOverImage.png",
+		"width": 0,
+		"height": 0
+	},
         {
             "name": "ground-rocks",
             "path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Ground_rocks.png",

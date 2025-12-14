@@ -7,7 +7,7 @@ export default class MapManager {
 		// Spawn points will be determined by exit zones in each map
 		this.maps = [
 		{
-			path: '/Starting_map.tmx',
+			path: '/maps/Starting_map.tmx',
 			name: 'Starting Map',
 			useExitAsSpawn: false,
 			spawnX: 335,
@@ -15,35 +15,35 @@ export default class MapManager {
 			forwardExitIndex: 0
 		},
 		{
-			path: '/map1.tmx',
+			path: '/maps/map1.tmx',
 			name: 'Map 1',
 			useExitAsSpawn: true,
 			exitIndex: 0,
 			forwardExitIndex: 1
 		},
 		{
-			path: '/GoodMap.tmx',
+			path: '/maps/GoodMap.tmx',
 			name: 'Good Map',
 			useExitAsSpawn: true,
 			exitIndex: 0,
 			forwardExitIndex: 1
 		},
 		{
-			path: '/map2.tmx',
+			path: '/maps/map2.tmx',
 			name: 'Map 2',
 			useExitAsSpawn: true,
 			exitIndex: 1,
 			forwardExitIndex: 0
 		},
 		{
-			path: '/terrainMapTiled.tmx',
+			path: '/maps/terrainMapTiled.tmx',
 			name: 'Terrain Map',
 			useExitAsSpawn: true,
 			exitIndex: 0,
 			forwardExitIndex: 1
 		},
 		{
-			path: '/BossRoom.tmx',
+			path: '/maps/BossRoom.tmx',
 			name: 'Boss Room',
 			useExitAsSpawn: true,
 			exitIndex: 0,

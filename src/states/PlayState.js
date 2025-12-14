@@ -274,7 +274,7 @@ export default class PlayState extends State {
 		const spawned = [];
 		
 		switch(mapPath) {
-			case '/Starting_map.tmx':
+			case '/maps/Starting_map.tmx':
 				// Starting zone - A few bats in corners
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 100, 100));
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 700, 100));
@@ -282,7 +282,7 @@ export default class PlayState extends State {
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 700, 700));
 				break;
 				
-			case '/map1.tmx':
+			case '/maps/map1.tmx':
 				// Map 1 - 5 bats spread out + 1 Spirit Boxer near top-left
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 150, 250));
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 400, 200));
@@ -292,7 +292,7 @@ export default class PlayState extends State {
 				spawned.push(Factory.createEnemy(EnemyType.SpiritBoxer, 200, 150));
 				break;
 				
-			case '/GoodMap.tmx':
+			case '/maps/GoodMap.tmx':
 				// Good Map - Lots of bats everywhere, spread out, some in water
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 200, 300));
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 400, 250));
@@ -307,7 +307,7 @@ export default class PlayState extends State {
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 500, 750));
 				break;
 				
-			case '/map2.tmx':
+			case '/maps/map2.tmx':
 				// Map 2 - Couple Spirit Boxers in front of EXIT (top), bats around
 				spawned.push(Factory.createEnemy(EnemyType.SpiritBoxer, 300, 120));
 				spawned.push(Factory.createEnemy(EnemyType.SpiritBoxer, 500, 120));
@@ -318,7 +318,7 @@ export default class PlayState extends State {
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 400, 600));
 				break;
 				
-			case '/terrainMapTiled.tmx':
+			case '/maps/terrainMapTiled.tmx':
 				// Terrain Map - Lots of bats at far left and right extremities (black space)
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 50, 200));
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 50, 350));
@@ -330,7 +330,7 @@ export default class PlayState extends State {
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 750, 650));
 				break;
 				
-			case '/BossRoom.tmx':
+			case '/maps/BossRoom.tmx':
 				// Boss Room - Temple Guardian at top + few bats
 				spawned.push(Factory.createEnemy(EnemyType.TempleGuardian, 400, 150));
 				spawned.push(Factory.createEnemy(EnemyType.ShadowBat, 250, 300));
