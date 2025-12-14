@@ -19,6 +19,12 @@ export default class EnemyDyingState extends State {
 			enemy.setAnimation('death');
 		}
 		
+		if (enemy.constructor.name === 'TempleGuardian') {
+			this.deathAnimationDuration = 10.0;
+		} else {
+			this.deathAnimationDuration = 1.0;
+		}
+		
 		// Mark enemy as dead (for removal by PlayState)
 		enemy.isDead = true;
 	}

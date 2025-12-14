@@ -1,257 +1,309 @@
 {
-	"images": [
-		{
-			"name": "ground-rocks",
-			"path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Ground_rocks.png",
-			"width": 496,
-			"height": 592
-		},
-		{
-			"name": "objects",
-			"path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Objects.png",
-			"width": 768,
-			"height": 704
-		},
-		{
-			"name": "water-coasts",
-			"path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Water_coasts.png",
-			"width": 1056,
-			"height": 256
-		},
-		{
-			"name": "water-detilazation",
-			"path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/water_detilazation.png",
-			"width": 688,
-			"height": 576
-		},
-		{
-			"name": "temple",
-			"path": "./assets/Sprites/DARK - Temple Guardians/Temple/Temple.png",
-			"width": 135,
-			"height": 109
-		},
-		{
-			"name": "enemy-idle-s",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-S.png",
-			"width": 3072,
-			"height": 256
-		},
-		{
-			"name": "enemy-idle-n",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-N.png",
-			"width": 3072,
-			"height": 256
-		},
-		{
-			"name": "enemy-idle-e",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-E.png",
-			"width": 3072,
-			"height": 256
-		},
-		{
-			"name": "enemy-idle-w",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-W.png",
-			"width": 3072,
-			"height": 256
-		},
-		{
-			"name": "enemy-idle-ne",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-NE.png",
-			"width": 3072,
-			"height": 256
-		},
-		{
-			"name": "enemy-idle-nw",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-NW.png",
-			"width": 3072,
-			"height": 256
-		},
-		{
-			"name": "enemy-idle-se",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-SE.png",
-			"width": 3072,
-			"height": 256
-		},
-		{
-			"name": "enemy-idle-sw",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-SW.png",
-			"width": 3072,
-			"height": 256
-		},
-		{
-			"name": "enemy-attack-s",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-S.png",
-			"width": 6144,
-			"height": 256
-		},
-		{
-			"name": "enemy-attack-n",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-N.png",
-			"width": 6144,
-			"height": 256
-		},
-		{
-			"name": "enemy-attack-e",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-E.png",
-			"width": 6144,
-			"height": 256
-		},
-		{
-			"name": "enemy-attack-w",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-W.png",
-			"width": 6144,
-			"height": 256
-		},
-		{
-			"name": "enemy-attack-ne",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-NE.png",
-			"width": 6144,
-			"height": 256
-		},
-		{
-			"name": "enemy-attack-nw",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-NW.png",
-			"width": 6144,
-			"height": 256
-		},
-		{
-			"name": "enemy-attack-se",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-SE.png",
-			"width": 6144,
-			"height": 256
-		},
-		{
-			"name": "enemy-attack-sw",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-SW.png",
-			"width": 6144,
-			"height": 256
-		},
-		{
-			"name": "enemy-death-s",
-			"path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Death.png",
-			"width": 6144,
-			"height": 256
-		},
-		{
-			"name": "bat-idle",
-			"path": "./assets/Sprites/Bat/idle.png",
-			"width": 308,
-			"height": 92
-		},
-		{
-			"name": "bat-idle-to-fly",
-			"path": "./assets/Sprites/Bat/idle to fly.png",
-			"width": 264,
-			"height": 92
-		},
-		{
-			"name": "bat-fly",
-			"path": "./assets/Sprites/Bat/fly.png",
-			"width": 308,
-			"height": 92
-		},
-		{
-			"name": "bat-bite",
-			"path": "./assets/Sprites/Bat/bite.png",
-			"width": 352,
-			"height": 92
-		},
-		{
-			"name": "bat-hit-death",
-			"path": "./assets/Sprites/Bat/hit and death.png",
-			"width": 308,
-			"height": 92
-		},
-		{
-			"name": "spirit-boxer-idle",
-			"path": "./assets/Sprites/Spirit Boxer/Idle.png",
-			"width": 137,
-			"height": 176
-		},
-		{
-			"name": "spirit-boxer-attack1",
-			"path": "./assets/Sprites/Spirit Boxer/attack 1.png",
-			"width": 137,
-			"height": 264
-		},
-		{
-			"name": "spirit-boxer-attack2",
-			"path": "./assets/Sprites/Spirit Boxer/attack 2.png",
-			"width": 137,
-			"height": 572
-		},
-		{
-			"name": "spirit-boxer-attack3",
-			"path": "./assets/Sprites/Spirit Boxer/attack 3.png",
-			"width": 137,
-			"height": 440
-		},
-		{
-			"name": "spirit-boxer-run",
-			"path": "./assets/Sprites/Spirit Boxer/Run.png",
-			"width": 137,
-			"height": 264
-		},
-		{
-			"name": "spirit-boxer-damaged-death",
-			"path": "./assets/Sprites/Spirit Boxer/Damaged & Death.png",
-			"width": 137,
-			"height": 528
-		},
-		{
-			"name": "temple-guardian-walk",
-			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/walk.png",
-			"width": 160,
-			"height": 472
-		},
-		{
-			"name": "temple-guardian-attack1",
-			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/attack 1 without VFX.png",
-			"width": 160,
-			"height": 649
-		},
-		{
-			"name": "temple-guardian-attack2",
-			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/Attack 2 without VFX.png",
-			"width": 160,
-			"height": 649
-		},
-		{
-			"name": "temple-guardian-special",
-			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/Special Without VFX.png",
-			"width": 160,
-			"height": 826
-		},
-		{
-			"name": "temple-guardian-hit",
-			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/hit.png",
-			"width": 160,
-			"height": 118
-		},
-		{
-			"name": "temple-guardian-death",
-			"path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/death.png",
-			"width": 160,
-			"height": 590
-		}
-	],
-	"fonts": [
-
-	],
-	"sounds": [
-		{
-			"name": "background-music",
-			"path": "./assets/sounds/background-music.mp3",
-			"size": 1,
-			"volume": 0.5,
-			"loop": true
-		},
-		{
-			"name": "menu-navigate",
-			"path": "./assets/sounds/menu-navigate.wav",
-			"size": 3,
-			"volume": 0.7,
-			"loop": false
-		}
-	]
+    "images": [
+        {
+            "name": "cutscene-0",
+            "path": "./Cutscene0.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "cutscene-1",
+            "path": "./Cutscene1.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "cutscene-2",
+            "path": "./Cutscene2.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "cutscene-3",
+            "path": "./Cutscene3.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "cutscene-4",
+            "path": "./Cutscene4.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "cutscene-5",
+            "path": "./Cutscene5.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "post-victory-cutscene",
+            "path": "./PostVictoryCutScene.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "victory-scene",
+            "path": "./VictoryScene.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "game-over-bg",
+            "path": "./GameOverImage.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "ground-rocks",
+            "path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Ground_rocks.png",
+            "width": 496,
+            "height": 592
+        },
+        {
+            "name": "objects",
+            "path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Objects.png",
+            "width": 768,
+            "height": 704
+        },
+        {
+            "name": "water-coasts",
+            "path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Water_coasts.png",
+            "width": 1056,
+            "height": 256
+        },
+        {
+            "name": "water-detilazation",
+            "path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/water_detilazation.png",
+            "width": 688,
+            "height": 576
+        },
+        {
+            "name": "temple",
+            "path": "./assets/Sprites/DARK - Temple Guardians/Temple/Temple.png",
+            "width": 135,
+            "height": 109
+        },
+        {
+            "name": "enemy-idle-s",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-S.png",
+            "width": 3072,
+            "height": 256
+        },
+        {
+            "name": "enemy-idle-n",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-N.png",
+            "width": 3072,
+            "height": 256
+        },
+        {
+            "name": "enemy-idle-e",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-E.png",
+            "width": 3072,
+            "height": 256
+        },
+        {
+            "name": "enemy-idle-w",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-W.png",
+            "width": 3072,
+            "height": 256
+        },
+        {
+            "name": "enemy-idle-ne",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-NE.png",
+            "width": 3072,
+            "height": 256
+        },
+        {
+            "name": "enemy-idle-nw",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-NW.png",
+            "width": 3072,
+            "height": 256
+        },
+        {
+            "name": "enemy-idle-se",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-SE.png",
+            "width": 3072,
+            "height": 256
+        },
+        {
+            "name": "enemy-idle-sw",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Idle-SW.png",
+            "width": 3072,
+            "height": 256
+        },
+        {
+            "name": "enemy-attack-s",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-S.png",
+            "width": 6144,
+            "height": 256
+        },
+        {
+            "name": "enemy-attack-n",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-N.png",
+            "width": 6144,
+            "height": 256
+        },
+        {
+            "name": "enemy-attack-e",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-E.png",
+            "width": 6144,
+            "height": 256
+        },
+        {
+            "name": "enemy-attack-w",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-W.png",
+            "width": 6144,
+            "height": 256
+        },
+        {
+            "name": "enemy-attack-ne",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-NE.png",
+            "width": 6144,
+            "height": 256
+        },
+        {
+            "name": "enemy-attack-nw",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-NW.png",
+            "width": 6144,
+            "height": 256
+        },
+        {
+            "name": "enemy-attack-se",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-SE.png",
+            "width": 6144,
+            "height": 256
+        },
+        {
+            "name": "enemy-attack-sw",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Attack-SW.png",
+            "width": 6144,
+            "height": 256
+        },
+        {
+            "name": "enemy-death-s",
+            "path": "./assets/Sprites/E_Bros_Assets_TopDownEnemy/Enemy-Melee-Death.png",
+            "width": 6144,
+            "height": 256
+        },
+        {
+            "name": "bat-idle",
+            "path": "./assets/Sprites/Bat/idle.png",
+            "width": 308,
+            "height": 92
+        },
+        {
+            "name": "bat-idle-to-fly",
+            "path": "./assets/Sprites/Bat/idle to fly.png",
+            "width": 264,
+            "height": 92
+        },
+        {
+            "name": "bat-fly",
+            "path": "./assets/Sprites/Bat/fly.png",
+            "width": 308,
+            "height": 92
+        },
+        {
+            "name": "bat-bite",
+            "path": "./assets/Sprites/Bat/bite.png",
+            "width": 352,
+            "height": 92
+        },
+        {
+            "name": "bat-hit-death",
+            "path": "./assets/Sprites/Bat/hit and death.png",
+            "width": 308,
+            "height": 92
+        },
+        {
+            "name": "spirit-boxer-idle",
+            "path": "./assets/Sprites/Spirit Boxer/Idle.png",
+            "width": 137,
+            "height": 176
+        },
+        {
+            "name": "spirit-boxer-attack1",
+            "path": "./assets/Sprites/Spirit Boxer/attack 1.png",
+            "width": 137,
+            "height": 264
+        },
+        {
+            "name": "spirit-boxer-attack2",
+            "path": "./assets/Sprites/Spirit Boxer/attack 2.png",
+            "width": 137,
+            "height": 572
+        },
+        {
+            "name": "spirit-boxer-attack3",
+            "path": "./assets/Sprites/Spirit Boxer/attack 3.png",
+            "width": 137,
+            "height": 440
+        },
+        {
+            "name": "spirit-boxer-run",
+            "path": "./assets/Sprites/Spirit Boxer/Run.png",
+            "width": 137,
+            "height": 264
+        },
+        {
+            "name": "spirit-boxer-damaged-death",
+            "path": "./assets/Sprites/Spirit Boxer/Damaged & Death.png",
+            "width": 137,
+            "height": 528
+        },
+        {
+            "name": "temple-guardian-walk",
+            "path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/walk.png",
+            "width": 160,
+            "height": 472
+        },
+        {
+            "name": "temple-guardian-attack1",
+            "path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/attack 1 without VFX.png",
+            "width": 160,
+            "height": 649
+        },
+        {
+            "name": "temple-guardian-attack2",
+            "path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/Attack 2 without VFX.png",
+            "width": 160,
+            "height": 649
+        },
+        {
+            "name": "temple-guardian-special",
+            "path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/Special Without VFX.png",
+            "width": 160,
+            "height": 826
+        },
+        {
+            "name": "temple-guardian-hit",
+            "path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/hit.png",
+            "width": 160,
+            "height": 118
+        },
+        {
+            "name": "temple-guardian-death",
+            "path": "./assets/Sprites/DARK - Temple Guardians/Temple Guardian/death.png",
+            "width": 160,
+            "height": 590
+        }
+    ],
+    "fonts": [],
+    "sounds": [
+        {
+            "name": "background-music",
+            "path": "./assets/sounds/background-music.mp3",
+            "size": 1,
+            "volume": 0.5,
+            "loop": true
+        },
+        {
+            "name": "menu-navigate",
+            "path": "./assets/sounds/menu-navigate.wav",
+            "size": 3,
+            "volume": 0.7,
+            "loop": false
+        }
+    ]
 }

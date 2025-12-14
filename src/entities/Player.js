@@ -147,12 +147,13 @@ export default class Player extends Entity {
 			ctx.globalAlpha = 0.15; // Almost fully transparent (vanish effect)
 		}
 		
-		// Only flicker at low health (below 30%)
+		// Only flicker at low health (below 30%) when taking damage (not while dodging)
 		const hpPercent = this.hp / this.maxHp;
 		const isLowHealth = hpPercent <= 0.3;
+		const isDodging = this.stateMachine.currentState.name === 'dodging';
 		
-		if (isLowHealth && this.invincibilityTimer > 0 && !isHit) {
-			// Flicker when low health and recently hit (but not during hit animation)
+		if (isLowHealth && this.invincibilityTimer > 0 && !isHit && !isDodging) {
+			// Flicker when low health and recently hit (but not during hit animation or dodge)
 			const flickerRate = 0.08;
 			const shouldShow = Math.floor(this.invincibilityTimer / flickerRate) % 2 === 0;
 			if (!shouldShow) {

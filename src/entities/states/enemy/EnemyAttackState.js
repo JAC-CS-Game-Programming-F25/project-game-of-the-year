@@ -30,11 +30,11 @@ export default class EnemyAttackState extends State {
 		
 		let duration = this.attackDuration;
 		if (enemy.currentAttackType === 'special') {
-			duration = 2.8;
+			duration = 9.0;
 		} else if (enemy.currentAttackType === 'attack1') {
-			duration = 0.9;
+			duration = 0.88;
 		} else if (enemy.currentAttackType === 'attack2') {
-			duration = 1.8;
+			duration = 5.5;
 		}
 		
 		if (this.attackTimer >= duration) {

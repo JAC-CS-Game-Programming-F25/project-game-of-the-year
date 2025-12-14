@@ -25,6 +25,9 @@ import {
 import GameOverState from './states/GameOverState.js';
 import VictoryState from './states/VictoryState.js';
 import TitleScreenState from './states/TitleScreenState.js';
+import CutsceneState from './states/CutsceneState.js';
+import InstructionsState from './states/InstructionsState.js';
+import PauseState from './states/PauseState.js';
 
 let PlayState = null;
 try {
@@ -60,6 +63,9 @@ sounds.load(soundDefinitions);
 // Make sure TitleScreen is added first and set as initial state
 try {
 	stateMachine.add(GameStateName.TitleScreen, new TitleScreenState());
+	stateMachine.add(GameStateName.Instructions, new InstructionsState());
+	stateMachine.add(GameStateName.Cutscene, new CutsceneState());
+	stateMachine.add(GameStateName.Pause, new PauseState());
 	stateMachine.add(GameStateName.GameOver, new GameOverState());
 	stateMachine.add(GameStateName.Victory, new VictoryState());
 	stateMachine.add(GameStateName.Play, new PlayState());
@@ -79,11 +85,59 @@ const game = new Game(
 	canvas.height
 );
 
+// Expose game loop starter for instructions screen
+window.startGameLoop = function() {
+	if (!game.isRunning) {
+		game.start();
+	}
+};
+
 // Function to start the game (called from title screen buttons)
 window.startGame = function() {
-	// Start the game with PlayState
-	stateMachine.change(GameStateName.Play);
-	game.start();
+	// Import SaveManager and cutscene data
+	Promise.all([
+		import('./services/SaveManager.js'),
+		import('./data/cutscenes.js')
+	]).then(([{ default: SaveManager }, { cutsceneData }]) => {
+		
+		// Check if this is a new game or continue
+		if (window.isNewGame) {
+			// New game: start with opening cutscene
+			const openingCutscene = cutsceneData.opening;
+			stateMachine.change(GameStateName.Cutscene, {
+				cutsceneData: {
+					image: images.get(openingCutscene.id),
+					dialogue: openingCutscene.dialogue
+				},
+				nextState: GameStateName.Play,
+				nextStateParams: {}
+			});
+		} else {
+			// Continue: load saved game
+			const saveData = SaveManager.loadGame();
+			if (saveData) {
+				// Skip cutscenes and load directly into PlayState with saved data
+				stateMachine.change(GameStateName.Play, {
+					loadSave: true,
+					saveData: saveData
+				});
+			} else {
+				// Fallback: no save found, start new game
+				console.error('No save data found, starting new game');
+				const openingCutscene = cutsceneData.opening;
+				stateMachine.change(GameStateName.Cutscene, {
+					cutsceneData: {
+						image: images.get(openingCutscene.id),
+						dialogue: openingCutscene.dialogue
+					},
+					nextState: GameStateName.Play,
+					nextStateParams: {}
+				});
+			}
+		}
+		
+		game.start();
+	});
 	
 	// Focus the canvas so that the player doesn't have to click on it.
 	canvas.focus();

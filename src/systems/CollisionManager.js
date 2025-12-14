@@ -129,21 +129,24 @@ export default class CollisionManager {
 				continue;
 			}
 			
-			const currentFrame = enemy.currentFrame || 0;
-			const totalFrames = enemy.animationFrames ? enemy.animationFrames[enemy.currentAnimation] : 8;
-			
-			// Later damage timing for longer attacks
-			let damageStartPercent = 0.6;
-			let damageEndPercent = 0.85;
-			
-			if (totalFrames >= 12) {
-				// Long attacks (like boxer attack2/attack3) - damage near the end
-				damageStartPercent = 0.7;
-				damageEndPercent = 0.9;
+		const currentFrame = enemy.currentFrame || 0;
+		const totalFrames = enemy.animationFrames ? enemy.animationFrames[enemy.currentAnimation] : 8;
+		
+		let damageStartPercent = 0.6;
+		let damageEndPercent = 0.85;
+		
+		if (enemy.constructor.name === 'TempleGuardian') {
+			if (enemy.currentAttackType === 'attack1' || enemy.currentAttackType === 'attack2') {
+				damageStartPercent = 9 / 11;
+				damageEndPercent = 1.0;
 			}
-			
-			const damageStartFrame = Math.floor(totalFrames * damageStartPercent);
-			const damageEndFrame = Math.floor(totalFrames * damageEndPercent);
+		} else if (totalFrames >= 12) {
+			damageStartPercent = 0.7;
+			damageEndPercent = 0.9;
+		}
+		
+		const damageStartFrame = Math.floor(totalFrames * damageStartPercent);
+		const damageEndFrame = Math.floor(totalFrames * damageEndPercent);
 			
 			if (currentFrame < damageStartFrame || currentFrame > damageEndFrame) {
 				continue;

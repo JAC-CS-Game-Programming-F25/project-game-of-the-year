@@ -32,7 +32,7 @@ export default class TempleGuardian extends Enemy {
 		this.detectionRange = 250;
 		this.attackRange = 70;
 		this.attackCooldown = 2.5;
-		this.lastAttackTime = -this.attackCooldown;
+		this.lastAttackTime = Date.now(); // Prevent instant attack on spawn
 		this.minDistanceToPlayer = 60;
 		
 		this.target = target;
@@ -150,12 +150,20 @@ export default class TempleGuardian extends Enemy {
 		
 		if (this.currentAnimation === 'attack') {
 			if (this.currentAttackType === 'special') {
-				currentInterval = 0.20;
+				if (this.currentFrame < 4) {
+					currentInterval = 0.15;
+				} else if (this.currentFrame < 10) {
+					currentInterval = 0.6;
+				} else {
+					currentInterval = 1.2;
+				}
 			} else if (this.currentAttackType === 'attack1') {
 				currentInterval = 0.08;
 			} else {
-				currentInterval = 0.16;
+				currentInterval = 0.50;
 			}
+		} else if (this.currentAnimation === 'dying' || this.currentAnimation === 'death') {
+			currentInterval = 1.0;
 		}
 		
 		this.frameTime += dt;

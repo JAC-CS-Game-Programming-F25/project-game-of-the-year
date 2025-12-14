@@ -186,6 +186,86 @@
                     2px 2px 0 rgba(0, 0, 0, 0.8);
             }
 
+            .menu-button:disabled {
+                opacity: 0.3;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+
+            .save-info {
+                font-size: 14px;
+                color: #6a8a9a;
+                text-align: center;
+                margin-top: 20px;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+            }
+
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 2000;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+
+            .modal-overlay.visible {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .modal {
+                background: linear-gradient(to top, rgba(10, 20, 30, 0.95), rgba(20, 40, 60, 0.9));
+                border: 2px solid rgba(100, 220, 255, 0.6);
+                padding: 40px;
+                max-width: 500px;
+                text-align: center;
+                box-shadow: 0 0 40px rgba(100, 220, 255, 0.3);
+            }
+
+            .modal-title {
+                font-size: 24px;
+                color: #e8f4f8;
+                margin-bottom: 20px;
+                text-shadow: 0 0 10px rgba(100, 220, 255, 0.5);
+            }
+
+            .modal-text {
+                font-size: 16px;
+                color: #a0c8d8;
+                margin-bottom: 30px;
+                line-height: 1.6;
+            }
+
+            .modal-buttons {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+            }
+
+            .modal-button {
+                background: linear-gradient(to top, rgba(10, 20, 30, 0.9), rgba(20, 40, 60, 0.6));
+                border: 2px solid rgba(100, 220, 255, 0.3);
+                color: #e8f4f8;
+                font-family: "Courier New", monospace;
+                font-size: 18px;
+                padding: 15px 30px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .modal-button:hover {
+                border-color: rgba(100, 220, 255, 0.6);
+                background: linear-gradient(to top, rgba(20, 40, 60, 0.9), rgba(30, 60, 90, 0.6));
+            }
+
             @keyframes breathe {
                 0%,
                 100% {
@@ -246,21 +326,62 @@
                     <button class="menu-button" id="continue-btn">
                         CONTINUE
                     </button>
+                    <button class="menu-button" id="instructions-btn">
+                        INSTRUCTIONS
+                    </button>
+                    <div class="save-info" id="save-info"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal">
+                <div class="modal-title" id="modal-title">Confirm New Game</div>
+                <div class="modal-text" id="modal-text">
+                    Starting a new game will delete your current save. Are you sure?
+                </div>
+                <div class="modal-buttons">
+                    <button class="modal-button" id="modal-confirm">CONFIRM</button>
+                    <button class="modal-button" id="modal-cancel">CANCEL</button>
                 </div>
             </div>
         </div>
         <canvas id="game-canvas"></canvas>
 
-        <script>
+        <script type="module">
+            // Import SaveManager
+            import SaveManager from './src/services/SaveManager.js';
+            
             // Track current screen state
             let currentScreen = "loading"; // "loading", "menu", "game"
-            let selectedOption = 0; // 0 = New Game, 1 = Continue
+            let selectedOption = 0; // 0 = New Game, 1 = Continue, 2 = Instructions
             let previousSelectedOption = 0; // Track previous selection for sound
+            let hasSaveFile = false;
 
             // Function to show menu buttons (fade in on same screen)
             window.showMenu = function () {
                 const pressEnter = document.getElementById("press-enter");
                 const menuContainer = document.getElementById("menu-container");
+                const continueBtn = document.getElementById("continue-btn");
+                const saveInfo = document.getElementById("save-info");
+
+                // Check for save file
+                hasSaveFile = SaveManager.hasSave();
+                
+                // Disable Continue button if no save
+                if (!hasSaveFile) {
+                    continueBtn.disabled = true;
+                    selectedOption = 0; // Force selection to New Game
+                    if (saveInfo) {
+                        saveInfo.textContent = "No save file found - Start New Game";
+                    }
+                } else {
+                    const info = SaveManager.getSaveInfo();
+                    if (info && saveInfo) {
+                        saveInfo.textContent = `Last save: ${info.dateString} at ${info.timeString}`;
+                    }
+                }
 
                 // Hide "PRESS ENTER" text
                 if (pressEnter) {
@@ -301,6 +422,12 @@
             function updateSelectedOption(playSound = true) {
                 const newGameBtn = document.getElementById("new-game-btn");
                 const continueBtn = document.getElementById("continue-btn");
+                const instructionsBtn = document.getElementById("instructions-btn");
+
+                // If Continue is disabled, skip it
+                if (!hasSaveFile && selectedOption === 1) {
+                    selectedOption = 2; // Jump to Instructions
+                }
 
                 // Play navigation sound only if selection actually changed
                 if (
@@ -311,12 +438,18 @@
                     window.playMenuNavigate();
                 }
 
+                // Remove all selections
+                newGameBtn.classList.remove("selected");
+                continueBtn.classList.remove("selected");
+                instructionsBtn.classList.remove("selected");
+
+                // Add selection to current option
                 if (selectedOption === 0) {
                     newGameBtn.classList.add("selected");
-                    continueBtn.classList.remove("selected");
-                } else {
+                } else if (selectedOption === 1) {
                     continueBtn.classList.add("selected");
-                    newGameBtn.classList.remove("selected");
+                } else if (selectedOption === 2) {
+                    instructionsBtn.classList.add("selected");
                 }
 
                 // Update previous selection
@@ -326,15 +459,73 @@
             function selectCurrentOption() {
                 if (selectedOption === 0) {
                     // New Game
-                    if (window.hideTitleScreen) {
+                    if (hasSaveFile) {
+                        // Show confirmation modal
+                        showModal(
+                            "Confirm New Game",
+                            "Starting a new game will delete your current save. Are you sure?",
+                            () => {
+                                SaveManager.deleteSave();
+                                window.isNewGame = true;
+                                window.hideTitleScreen();
+                            }
+                        );
+                    } else {
+                        window.isNewGame = true;
                         window.hideTitleScreen();
                     }
-                } else {
-                    // Continue (for now, same as New Game)
-                    if (window.hideTitleScreen) {
+                } else if (selectedOption === 1) {
+                    // Continue
+                    if (!hasSaveFile) {
+                        // Show error modal
+                        showModal(
+                            "No Save Found",
+                            "There is no save file to continue from. Please start a New Game.",
+                            null,
+                            true
+                        );
+                    } else {
+                        window.isNewGame = false;
                         window.hideTitleScreen();
                     }
+                } else if (selectedOption === 2) {
+                    // Instructions
+                    window.showInstructions();
                 }
+            }
+
+            function showModal(title, text, onConfirm, errorMode = false) {
+                const overlay = document.getElementById("modal-overlay");
+                const titleEl = document.getElementById("modal-title");
+                const textEl = document.getElementById("modal-text");
+                const confirmBtn = document.getElementById("modal-confirm");
+                const cancelBtn = document.getElementById("modal-cancel");
+
+                titleEl.textContent = title;
+                textEl.textContent = text;
+
+                if (errorMode) {
+                    // Error mode: only show OK button
+                    confirmBtn.textContent = "OK";
+                    cancelBtn.style.display = "none";
+                    confirmBtn.onclick = () => hideModal();
+                } else {
+                    // Confirmation mode: show both buttons
+                    confirmBtn.textContent = "CONFIRM";
+                    cancelBtn.style.display = "block";
+                    confirmBtn.onclick = () => {
+                        hideModal();
+                        if (onConfirm) onConfirm();
+                    };
+                    cancelBtn.onclick = () => hideModal();
+                }
+
+                overlay.classList.add("visible");
+            }
+
+            function hideModal() {
+                const overlay = document.getElementById("modal-overlay");
+                overlay.classList.remove("visible");
             }
 
             // Wait for Enter key on loading screen
@@ -375,7 +566,11 @@
                         e.key === "w" ||
                         e.key === "W"
                     ) {
-                        selectedOption = 0;
+                        selectedOption = (selectedOption - 1 + 3) % 3;
+                        // Skip Continue if no save
+                        if (!hasSaveFile && selectedOption === 1) {
+                            selectedOption = 0;
+                        }
                         updateSelectedOption();
                     } else if (
                         e.key === "ArrowDown" ||
@@ -383,16 +578,45 @@
                         e.key === "s" ||
                         e.key === "S"
                     ) {
-                        selectedOption = 1;
+                        selectedOption = (selectedOption + 1) % 3;
+                        // Skip Continue if no save
+                        if (!hasSaveFile && selectedOption === 1) {
+                            selectedOption = 2;
+                        }
                         updateSelectedOption();
                     }
                 }
             });
 
+            // Function to show instructions
+            window.showInstructions = function() {
+                // Hide title screen
+                const loadingScreen = document.getElementById("loading-screen");
+                loadingScreen.style.opacity = "0";
+                loadingScreen.style.transition = "opacity 0.5s ease-out";
+                currentScreen = "game";
+                setTimeout(() => {
+                    loadingScreen.style.display = "none";
+                    document.getElementById("game-canvas").style.display = "block";
+                    
+                    // Import and show instructions state
+                    import('./src/globals.js').then(({ stateMachine }) => {
+                        import('./src/enums/GameStateName.js').then(({ default: GameStateName }) => {
+                            stateMachine.change(GameStateName.Instructions);
+                            // Start game loop if not already started
+                            if (window.startGameLoop) {
+                                window.startGameLoop();
+                            }
+                        });
+                    });
+                }, 500);
+            };
+
             // Button handlers
             document.addEventListener("DOMContentLoaded", () => {
                 const newGameBtn = document.getElementById("new-game-btn");
                 const continueBtn = document.getElementById("continue-btn");
+                const instructionsBtn = document.getElementById("instructions-btn");
 
                 if (newGameBtn) {
                     newGameBtn.addEventListener("click", () => {
@@ -412,6 +636,17 @@
                     });
                     continueBtn.addEventListener("mouseenter", () => {
                         selectedOption = 1;
+                        updateSelectedOption();
+                    });
+                }
+
+                if (instructionsBtn) {
+                    instructionsBtn.addEventListener("click", () => {
+                        selectedOption = 2;
+                        selectCurrentOption();
+                    });
+                    instructionsBtn.addEventListener("mouseenter", () => {
+                        selectedOption = 2;
                         updateSelectedOption();
                     });
                 }

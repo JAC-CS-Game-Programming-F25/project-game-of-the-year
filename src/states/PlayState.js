@@ -3,6 +3,7 @@ import Map from "../systems/Map.js";
 import Camera from "../systems/Camera.js";
 import MapManager from "../systems/MapManager.js";
 import CollisionManager from "../systems/CollisionManager.js";
+import SaveManager from "../services/SaveManager.js";
 import Player from "../entities/Player.js";
 import Direction from "../enums/Direction.js";
 import Factory from "../services/Factory.js";
@@ -22,10 +23,145 @@ export default class PlayState extends State {
 		this.mapManager = new MapManager();
 		this.isTransitioning = false;
 		this.transitionCooldown = 0; // Prevent immediate re-trigger
+		this.escapePressed = false; // For pause menu
 	}
 
-	async enter() {
+	async enter(params = {}) {
+		// Expose saveGame to window for pause menu
+		window.manualSave = () => this.saveGame();
+		
+		// If loading from save
+		if (params.loadSave && params.saveData) {
+			await this.loadFromSave(params.saveData);
+			return;
+		}
+		
+		// If returning from pause, don't reload
+		if (params.fromPause) {
+			return;
+		}
+		
+		// If returning from cutscene, map is already loaded
+		if (params.skipCutscene) {
+			return;
+		}
+		
 		await this.loadCurrentMap();
+	}
+
+	/**
+	 * Load game from save data
+	 */
+	async loadFromSave(saveData) {
+		try {
+			console.log('Loading game from save:', saveData);
+			
+			// Set map manager to the saved map
+			const mapIndex = this.mapManager.maps.findIndex(m => m.path === saveData.currentMap);
+			if (mapIndex >= 0) {
+				this.mapManager.currentMapIndex = mapIndex;
+			}
+			
+			// Load the map
+			const mapConfig = this.mapManager.getCurrentMap();
+			if (!this.camera) {
+				this.camera = new Camera(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+			}
+			
+			this.map = new Map(mapConfig.path, images);
+			await this.map.load();
+			
+			const mapWidth = this.map.width * this.map.tileWidth;
+			const mapHeight = this.map.height * this.map.tileHeight;
+			this.camera.setBounds(mapWidth, mapHeight);
+			
+			// Restore player state
+			if (!this.player) {
+				this.player = new Player(saveData.player.x, saveData.player.y, 28, 36);
+			} else {
+				this.player.x = saveData.player.x;
+				this.player.y = saveData.player.y;
+			}
+			this.player.hp = saveData.player.hp;
+			this.player.maxHp = saveData.player.maxHp;
+			this.player.direction = saveData.player.direction;
+			
+			// Set camera to follow player
+			this.camera.setTarget(this.player);
+			
+			// Restore enemies from save data
+			this.enemies = [];
+			if (saveData.enemies && saveData.enemies.length > 0) {
+				for (const enemyData of saveData.enemies) {
+					let enemy = null;
+					
+					// Create enemy based on saved type
+					if (enemyData.type === 'ShadowBat') {
+						enemy = Factory.createEnemy(EnemyType.ShadowBat, enemyData.x, enemyData.y);
+					} else if (enemyData.type === 'SpiritBoxer') {
+						enemy = Factory.createEnemy(EnemyType.SpiritBoxer, enemyData.x, enemyData.y);
+					} else if (enemyData.type === 'TempleGuardian') {
+						enemy = Factory.createEnemy(EnemyType.TempleGuardian, enemyData.x, enemyData.y);
+					}
+					
+					if (enemy) {
+						enemy.hp = enemyData.hp;
+						enemy.maxHp = enemyData.maxHp;
+						enemy.target = this.player;
+						this.enemies.push(enemy);
+					}
+				}
+				console.log(`Restored ${this.enemies.length} enemies from save`);
+			} else {
+				console.log('No enemies in save data');
+			}
+			
+			// Initialize collision manager
+			if (!this.collisionManager) {
+				this.collisionManager = new CollisionManager();
+			}
+			this.collisionManager.setPlayer(this.player);
+			this.collisionManager.setEnemies(this.enemies);
+			
+			console.log('Game loaded successfully');
+		} catch (error) {
+			console.error('Error loading from save:', error);
+			// Fallback to normal map load
+			await this.loadCurrentMap();
+		}
+	}
+
+	/**
+	 * Save the current game state
+	 */
+	saveGame() {
+		try {
+			if (!this.player || !this.mapManager) {
+				console.error('Cannot save: player or mapManager not initialized');
+				return false;
+			}
+
+			const gameState = {
+				player: this.player,
+				currentMap: this.mapManager.getCurrentMap().path,
+				mapProgress: this.mapManager.currentMapIndex,
+				enemies: this.enemies, // Save current enemy states
+				flags: {
+					// Add any game flags here (e.g., bossDefeated)
+				}
+			};
+			
+			const success = SaveManager.saveGame(gameState);
+			if (success) {
+				console.log('Game saved successfully');
+			} else {
+				console.error('SaveManager.saveGame returned false');
+			}
+			return success;
+		} catch (error) {
+			console.error('Error in saveGame:', error);
+			return false;
+		}
 	}
 
 	/**
@@ -215,6 +351,16 @@ export default class PlayState extends State {
 	}
 
 	update(dt) {
+		// Check for ESC key to open pause menu
+		if (input.keys.ESCAPE && !this.escapePressed) {
+			this.escapePressed = true;
+			input.keys.ESCAPE = false; // Clear key immediately
+			stateMachine.change(GameStateName.Pause);
+			return;
+		}
+		if (!input.keys.ESCAPE) {
+			this.escapePressed = false;
+		}
 		
 		// Store player's previous position for collision checking
 		let prevX = 0;
@@ -239,8 +385,19 @@ export default class PlayState extends State {
 			enemy.update(dt);
 		}
 
+		// Check if Temple Guardian is about to be removed (victory condition)
+		const bossDefeated = this.enemies.some(e => 
+			e.constructor.name === 'TempleGuardian' && e.readyForRemoval
+		);
+		
 		// Remove dead enemies
 		this.enemies = this.enemies.filter(enemy => !enemy.readyForRemoval);
+		
+		// Trigger victory cutscene if boss was defeated
+		if (bossDefeated) {
+			this.triggerVictoryCutscenes();
+			return;
+		}
 		
 		// Update collision manager with current enemies
 		this.collisionManager.setEnemies(this.enemies);
@@ -255,7 +412,7 @@ export default class PlayState extends State {
 		
 		// Check if player death animation complete (transition to GameOver)
 		if (this.player && this.player.stateMachine.currentState.name === 'dying' && this.player.readyForGameOver) {
-			stateMachine.change(GameStateName.GameOver);
+			stateMachine.change(GameStateName.GameOver, { images });
 			return;
 		}
 
@@ -359,7 +516,7 @@ export default class PlayState extends State {
 	renderHUD(context) {
 		if (!this.player) return;
 		
-		// HP Bar (top-left corner)
+		// Player HP Bar (top-left corner)
 		const barX = 20;
 		const barY = 20;
 		const barWidth = 200;
@@ -383,11 +540,65 @@ export default class PlayState extends State {
 		context.lineWidth = 2;
 		context.strokeRect(barX, barY, barWidth, barHeight);
 		
-		// HP Text
+		// HP Text (below the bar)
 		context.fillStyle = '#ffffff';
 		context.font = '14px Arial';
 		context.textAlign = 'left';
-		context.fillText(`HP: ${Math.ceil(this.player.hp)} / ${this.player.maxHp}`, barX + 5, barY + 15);
+		context.fillText(`HP: ${Math.ceil(this.player.hp)} / ${this.player.maxHp}`, barX + 5, barY + barHeight + 15);
+		
+		// Boss Health Bar (Temple Guardian)
+		const boss = this.enemies.find(e => e.constructor.name === 'TempleGuardian' && e.isAlive());
+		if (boss) {
+			const bossBarWidth = 400;
+			const bossBarHeight = 30;
+			const bossBarX = (CANVAS_WIDTH - bossBarWidth) / 2;
+			const bossBarY = 60;
+			const bossHpPercent = boss.hp / boss.maxHp;
+			
+			// Boss Name (above bar)
+			context.fillStyle = '#e8f4f8';
+			context.font = 'bold 20px "Georgia", serif';
+			context.textAlign = 'center';
+			context.fillText('TEMPLE GUARDIAN', CANVAS_WIDTH / 2, bossBarY - 20);
+			
+			// Background (black)
+			context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+			context.fillRect(bossBarX - 3, bossBarY - 3, bossBarWidth + 6, bossBarHeight + 6);
+			
+			// Empty bar (dark gold)
+			context.fillStyle = '#3a2a00';
+			context.fillRect(bossBarX, bossBarY, bossBarWidth, bossBarHeight);
+			
+			// HP bar (gold/orange - red when low)
+			if (bossHpPercent > 0.5) {
+				context.fillStyle = '#d4af37'; // Gold
+			} else if (bossHpPercent > 0.25) {
+				context.fillStyle = '#ff8c00'; // Orange
+			} else {
+				context.fillStyle = '#cc0000'; // Red
+			}
+			context.fillRect(bossBarX, bossBarY, bossBarWidth * bossHpPercent, bossBarHeight);
+			
+			// Buff indicator (glowing border if buffed)
+			if (boss.isBuffed) {
+				context.strokeStyle = 'rgba(255, 100, 0, 0.9)';
+				context.lineWidth = 4;
+				context.shadowColor = 'rgba(255, 100, 0, 0.8)';
+				context.shadowBlur = 10;
+			} else {
+				context.strokeStyle = '#ffffff';
+				context.lineWidth = 3;
+				context.shadowBlur = 0;
+			}
+			context.strokeRect(bossBarX, bossBarY, bossBarWidth, bossBarHeight);
+			context.shadowBlur = 0;
+			
+			// HP Text (inside bar)
+			context.fillStyle = '#ffffff';
+			context.font = 'bold 16px Arial';
+			context.textAlign = 'center';
+			context.fillText(`${Math.ceil(boss.hp)} / ${boss.maxHp}`, CANVAS_WIDTH / 2, bossBarY + bossBarHeight / 2 + 6);
+		}
 	}
 
 	/**
@@ -419,11 +630,45 @@ export default class PlayState extends State {
 		
 		this.isTransitioning = true;
 		
+		// Get the current map index before advancing
+		const currentMapIndex = this.mapManager.currentMapIndex;
+		console.log('Transitioning from map index:', currentMapIndex);
 		const nextMap = this.mapManager.goToNextMap();
+		console.log('Next map:', nextMap);
 		
 		if (nextMap) {
-			await this.loadCurrentMap();
+			// Get cutscene for the map we just completed
+			const { cutsceneData } = await import('../data/cutscenes.js');
+			let cutscene = null;
+			
+			switch(currentMapIndex) {
+				case 0: cutscene = cutsceneData.afterStarting; break;
+				case 1: cutscene = cutsceneData.afterMap1; break;
+				case 2: cutscene = cutsceneData.afterGoodMap; break;
+				case 3: cutscene = cutsceneData.afterMap2; break;
+				case 4: cutscene = cutsceneData.beforeBoss; break;
+			}
+			
+			console.log('Cutscene for map', currentMapIndex, ':', cutscene);
+			
+			if (cutscene) {
+				// Show cutscene, then load next map when it finishes
+				console.log('Showing cutscene...');
+				stateMachine.change(GameStateName.Cutscene, {
+					cutsceneData: {
+						image: images.get(cutscene.id),
+						dialogue: cutscene.dialogue
+					},
+					nextState: GameStateName.Play,
+					nextStateParams: {}
+				});
+			} else {
+				// No cutscene for this transition, load map directly
+				console.log('No cutscene, loading map directly...');
+				await this.loadCurrentMap();
+			}
 		} else {
+			// No more maps, victory!
 			stateMachine.change(GameStateName.Victory);
 		}
 	}
@@ -443,5 +688,34 @@ export default class PlayState extends State {
 		} else {
 			this.isTransitioning = false;
 		}
+	}
+	
+	/**
+	 * Trigger victory cutscenes after defeating Temple Guardian
+	 */
+	async triggerVictoryCutscenes() {
+		const { cutsceneData } = await import('../data/cutscenes.js');
+		
+		const postVictoryCutscene = cutsceneData.postVictory;
+		const victoryCutscene = cutsceneData.victory;
+		
+		stateMachine.change(GameStateName.Cutscene, {
+			cutsceneData: {
+				image: images.get(postVictoryCutscene.id),
+				dialogue: postVictoryCutscene.dialogue
+			},
+			onComplete: () => {
+				stateMachine.change(GameStateName.Cutscene, {
+					cutsceneData: {
+						image: images.get(victoryCutscene.id),
+						dialogue: victoryCutscene.dialogue
+					},
+					delayBeforePrompt: 20,
+					onComplete: () => {
+						window.location.reload();
+					}
+				});
+			}
+		});
 	}
 }

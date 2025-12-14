@@ -35,7 +35,7 @@ export default class SpiritBoxer extends Enemy {
 		this.detectionRange = 200;
 		this.attackRange = 65;
 		this.attackCooldown = 2.0;
-		this.lastAttackTime = -this.attackCooldown;
+		this.lastAttackTime = Date.now(); // Prevent instant attack on spawn
 		this.minDistanceToPlayer = 65;
 		
 		this.target = target;
