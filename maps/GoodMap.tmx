@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="5">
- <tileset firstgid="1" source="../ground.tsx"/>
- <tileset firstgid="1148" source="../Objects.tsx"/>
- <tileset firstgid="3260" source="../Water_coasts.tsx"/>
- <tileset firstgid="4316" source="../water_detilazation.tsx"/>
+ <tileset firstgid="1" source="ground.tsx"/>
+ <tileset firstgid="1148" source="Objects.tsx"/>
+ <tileset firstgid="3260" source="Water_coasts.tsx"/>
+ <tileset firstgid="4316" source="water_detilazation.tsx"/>
  <layer id="3" name="Water_Underlay" width="50" height="50">
   <data encoding="csv">
 3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,3221231018,

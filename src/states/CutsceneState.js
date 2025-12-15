@@ -1,6 +1,7 @@
 import State from "../../lib/State.js";
 import GameStateName from "../enums/GameStateName.js";
-import { input, stateMachine } from "../globals.js";
+import { input, stateMachine, timer } from "../globals.js";
+import Easing from "../../lib/Easing.js";
 
 export default class CutsceneState extends State {
 	constructor() {
@@ -15,6 +16,7 @@ export default class CutsceneState extends State {
 		this.escapePressed = false;
 		this.delayBeforePrompt = 0;
 		this.delayTimer = 0;
+		this.fade = { alpha: 1.0 };
 	}
 
 	enter(params = {}) {
@@ -30,6 +32,10 @@ export default class CutsceneState extends State {
 		this.delayTimer = 0;
 		this.spacePressed = false;
 		this.escapePressed = false;
+		
+		// Fade in from black
+		this.fade.alpha = 1.0;
+		timer.tween(this.fade, { alpha: 0 }, 0.8, Easing.linear);
 	}
 
 	update(dt) {
@@ -44,11 +50,7 @@ export default class CutsceneState extends State {
 		// If no dialogue (like victory screen), wait for Space/ESC to finish
 		if (this.dialogueLines.length === 0) {
 			if ((input.keys[' '] && !this.spacePressed) || (input.keys.ESCAPE && !this.escapePressed)) {
-				if (this.onComplete) {
-					this.onComplete();
-				} else {
-					stateMachine.change(this.nextState, this.nextStateParams);
-				}
+				this.fadeOutAndTransition();
 				return;
 			}
 			
@@ -66,13 +68,9 @@ export default class CutsceneState extends State {
 			this.spacePressed = true;
 			this.currentDialogueIndex++;
 			
-			// If finished all dialogue
+			// If finished all dialogue, fade out then transition
 			if (this.currentDialogueIndex >= this.dialogueLines.length) {
-				if (this.onComplete) {
-					this.onComplete();
-				} else {
-					stateMachine.change(this.nextState, this.nextStateParams);
-				}
+				this.fadeOutAndTransition();
 				return;
 			}
 		}
@@ -84,16 +82,27 @@ export default class CutsceneState extends State {
 		// Handle Escape to skip cutscene
 		if (input.keys.ESCAPE && !this.escapePressed) {
 			this.escapePressed = true;
-			if (this.onComplete) {
-				this.onComplete();
-			} else {
-				stateMachine.change(this.nextState, this.nextStateParams);
-			}
+			this.fadeOutAndTransition();
 			return;
 		}
 		
 		if (!input.keys.ESCAPE) {
 			this.escapePressed = false;
+		}
+	}
+
+	/**
+	 * Fade out then transition to next state
+	 */
+	async fadeOutAndTransition() {
+		// Fade out to black
+		await timer.tweenAsync(this.fade, { alpha: 1.0 }, 0.5, Easing.linear);
+		
+		// Transition to next state
+		if (this.onComplete) {
+			this.onComplete();
+		} else {
+			stateMachine.change(this.nextState, this.nextStateParams);
 		}
 	}
 
@@ -123,6 +132,14 @@ export default class CutsceneState extends State {
 				context.textAlign = 'center';
 				context.fillText("Press SPACE or ESC to return to Main Menu", canvas.width / 2, canvas.height - 50);
 			}
+		}
+
+		// Draw fade overlay
+		if (this.fade.alpha > 0) {
+			context.save();
+			context.fillStyle = `rgba(0, 0, 0, ${this.fade.alpha})`;
+			context.fillRect(0, 0, canvas.width, canvas.height);
+			context.restore();
 		}
 	}
 

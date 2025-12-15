@@ -23,7 +23,6 @@ export default class PauseState extends State {
 		this.sPressed = false;
 		this.spacePressed = false;
 		this.escapePressed = false;
-		console.log('Pause menu opened');
 	}
 
 	update(dt) {
@@ -73,21 +72,15 @@ export default class PauseState extends State {
 	}
 
 	selectOption() {
-		console.log('PauseState: Selected option', this.selectedOption);
-		
 		switch (this.selectedOption) {
 			case 0: // RESUME
-				console.log('PauseState: Resuming game');
 				stateMachine.change(GameStateName.Play, { fromPause: true });
 				break;
 
 			case 1: // SAVE GAME
-				console.log('PauseState: Saving game...');
 				if (window.manualSave) {
 					try {
-						console.log('Calling window.manualSave()');
 						const success = window.manualSave();
-						console.log('Save result:', success);
 						if (success) {
 							this.saveMessage = 'Game Saved Successfully!';
 							this.saveMessageTimer = 2.0;
@@ -109,7 +102,6 @@ export default class PauseState extends State {
 				break;
 
 			case 2: // QUIT TO MENU
-				console.log('PauseState: Quitting to menu');
 				window.location.reload();
 				break;
 		}

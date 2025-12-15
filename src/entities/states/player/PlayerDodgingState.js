@@ -25,8 +25,6 @@ export default class PlayerDodgingState extends State {
 		
 		// Set invincibility
 		player.invincibilityTimer = player.dodgeDuration;
-		
-		// TODO: Play dodge animation
 	}
 
 	exit() {

@@ -23,14 +23,10 @@ export default class PlayerStateMachine extends EntityStateMachine {
 		this.add(PlayerState.HIT, new PlayerHitState());
 		this.add(PlayerState.DYING, new PlayerDyingState());
 		
-		// Debug: Check player HP at initialization
-		console.log('PlayerStateMachine init: Player HP:', player.hp, 'isAlive:', player.isAlive());
-		
 		// Force set to IDLE state (the add() method sets currentState to last added, which is DYING)
 		this.currentState = this.states[PlayerState.IDLE];
 		if (this.currentState) {
 			this.currentState.enter();
-			console.log('PlayerStateMachine: Forced to IDLE state');
 		}
 	}
 

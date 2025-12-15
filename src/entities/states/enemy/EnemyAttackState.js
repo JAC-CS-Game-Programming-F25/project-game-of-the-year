@@ -1,5 +1,6 @@
 import State from '../../../../lib/State.js';
 import EntityState from '../../../enums/EntityState.js';
+import { sounds } from '../../../globals.js';
 
 export default class EnemyAttackState extends State {
 	constructor() {
@@ -40,6 +41,21 @@ export default class EnemyAttackState extends State {
 		if (this.attackTimer >= duration) {
 			if (enemy.currentAttackType === 'special' && enemy.activateBuff) {
 				enemy.activateBuff();
+				
+				// Trigger massive special attack effects for Temple Guardian
+				if (enemy.constructor.name === 'TempleGuardian') {
+					// Play special attack sound
+					sounds.play('boss-special');
+					
+					// Trigger MASSIVE camera shake
+					if (enemy.camera) {
+						enemy.camera.triggerShake(80, 1.2);
+					}
+					// Trigger special attack particle burst
+					if (enemy.particleSystem) {
+						enemy.particleSystem.createSpecialAttackBurst(enemy.x, enemy.y);
+					}
+				}
 			}
 			
 			// Check if Spirit Boxer should immediately combo

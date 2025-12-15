@@ -8,8 +8,14 @@ import Direction from '../../../enums/Direction.js';
  * Player is moving with WASD input. Uses idle animation (player floats).
  */
 export default class PlayerMovingState extends State {
+	constructor() {
+		super();
+		this.previousDirection = null;
+	}
+
 	enter() {
-		// Entering moving state
+		const player = this.stateMachine.entity;
+		this.previousDirection = player.direction;
 	}
 
 	exit() {
@@ -22,7 +28,19 @@ export default class PlayerMovingState extends State {
 		// Calculate movement direction from WASD input
 		const direction = this.getMovementDirection(input);
 		if (direction) {
-			player.direction = direction;
+			// Smooth direction transitions
+			if (this.previousDirection !== direction) {
+				const intermediate = this.getIntermediateDirection(this.previousDirection, direction);
+				if (intermediate) {
+					player.direction = intermediate;
+					this.previousDirection = intermediate;
+				} else {
+					player.direction = direction;
+					this.previousDirection = direction;
+				}
+			} else {
+				player.direction = direction;
+			}
 			
 			// Calculate movement vector
 			const moveX = this.getDirectionX(direction) * player.speed * dt;
@@ -54,6 +72,39 @@ export default class PlayerMovingState extends State {
 
 	render() {
 		// Rendering handled by Player class
+	}
+
+	/**
+	 * Get intermediate direction between two directions for smooth transitions.
+	 * @param {Direction} from - Previous direction
+	 * @param {Direction} to - New direction
+	 * @returns {Direction|null} - Intermediate direction or null if already adjacent
+	 */
+	getIntermediateDirection(from, to) {
+		const transitions = {
+			[Direction.N]: {
+				[Direction.E]: Direction.NE,
+				[Direction.W]: Direction.NW,
+				[Direction.S]: null, // Opposite, no intermediate
+			},
+			[Direction.S]: {
+				[Direction.E]: Direction.SE,
+				[Direction.W]: Direction.SW,
+				[Direction.N]: null,
+			},
+			[Direction.E]: {
+				[Direction.N]: Direction.NE,
+				[Direction.S]: Direction.SE,
+				[Direction.W]: null,
+			},
+			[Direction.W]: {
+				[Direction.N]: Direction.NW,
+				[Direction.S]: Direction.SW,
+				[Direction.E]: null,
+			},
+		};
+
+		return transitions[from]?.[to] || null;
 	}
 
 	/**

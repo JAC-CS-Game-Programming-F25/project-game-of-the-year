@@ -19,17 +19,12 @@ export default class PlayerAttackingState extends State {
 		
 		// Reset damage flag for this attack
 		player.hasDealtDamage = false;
-		
-		console.log('PlayerAttackingState: Attack started, total frames:', player.totalFrames);
 	}
 
 	exit() {
 		// Reset to idle animation
 		const player = this.stateMachine.entity;
 		player.setAnimation('idle');
-		
-		// TODO: Deactivate attack hitbox
-		console.log('PlayerAttackingState: Attack finished at frame', player.currentFrame);
 	}
 
 	update(dt, input) {

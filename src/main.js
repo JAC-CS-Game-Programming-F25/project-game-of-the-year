@@ -8,51 +8,53 @@
  * Asset sources
  */
 
-import GameStateName from './enums/GameStateName.js';
-import Game from '../lib/Game.js';
+import GameStateName from "./enums/GameStateName.js";
+import Game from "../lib/Game.js";
 import {
-	canvas,
-	CANVAS_HEIGHT,
-	CANVAS_WIDTH,
-	context,
-	fonts,
-	images,
-	timer,
-	sounds,
-	stateMachine,
-} from './globals.js';
+    canvas,
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    context,
+    fonts,
+    images,
+    timer,
+    sounds,
+    stateMachine,
+} from "./globals.js";
 // Import states - wrap PlayState in try-catch since it has dependencies that might fail
-import GameOverState from './states/GameOverState.js';
-import VictoryState from './states/VictoryState.js';
-import TitleScreenState from './states/TitleScreenState.js';
-import CutsceneState from './states/CutsceneState.js';
-import InstructionsState from './states/InstructionsState.js';
-import PauseState from './states/PauseState.js';
+import GameOverState from "./states/GameOverState.js";
+import VictoryState from "./states/VictoryState.js";
+import TitleScreenState from "./states/TitleScreenState.js";
+import CutsceneState from "./states/CutsceneState.js";
+import InstructionsState from "./states/InstructionsState.js";
+import PauseState from "./states/PauseState.js";
 
 let PlayState = null;
 try {
-	PlayState = (await import('./states/PlayState.js')).default;
+    PlayState = (await import("./states/PlayState.js")).default;
 } catch (error) {
-	console.error('Error loading PlayState:', error);
-	// Create a placeholder PlayState that won't break
-	PlayState = class extends TitleScreenState {
-		async enter() {
-			console.error('PlayState failed to load. Please check console for errors.');
-		}
-	};
+    console.error("Error loading PlayState:", error);
+    // Create a placeholder PlayState that won't break
+    PlayState = class extends TitleScreenState {
+        async enter() {
+            console.error(
+                "PlayState failed to load. Please check console for errors."
+            );
+        }
+    };
 }
 
 // Set the dimensions of the play area (canvas already exists in DOM from index.html)
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
-canvas.setAttribute('tabindex', '1'); // Allows the canvas to receive user input.
+canvas.setAttribute("tabindex", "1"); // Allows the canvas to receive user input.
 
 // Fetch the asset definitions from config.json.
 const {
-	images: imageDefinitions,
-	fonts: fontDefinitions,
-	sounds: soundDefinitions,
-} = await fetch('./src/config.json').then((response) => response.json());
+    images: imageDefinitions,
+    fonts: fontDefinitions,
+    sounds: soundDefinitions,
+} = await fetch("./src/config.json").then((response) => response.json());
 
 // Load all the assets from their definitions.
 await images.load(imageDefinitions);
@@ -62,101 +64,99 @@ sounds.load(soundDefinitions);
 // Add all the states to the state machine.
 // Make sure TitleScreen is added first and set as initial state
 try {
-	stateMachine.add(GameStateName.TitleScreen, new TitleScreenState());
-	stateMachine.add(GameStateName.Instructions, new InstructionsState());
-	stateMachine.add(GameStateName.Cutscene, new CutsceneState());
-	stateMachine.add(GameStateName.Pause, new PauseState());
-	stateMachine.add(GameStateName.GameOver, new GameOverState());
-	stateMachine.add(GameStateName.Victory, new VictoryState());
-	stateMachine.add(GameStateName.Play, new PlayState());
-	// Set TitleScreen as the initial state (not the last one added)
-	stateMachine.change(GameStateName.TitleScreen);
+    stateMachine.add(GameStateName.TitleScreen, new TitleScreenState());
+    stateMachine.add(GameStateName.Instructions, new InstructionsState());
+    stateMachine.add(GameStateName.Cutscene, new CutsceneState());
+    stateMachine.add(GameStateName.Pause, new PauseState());
+    stateMachine.add(GameStateName.GameOver, new GameOverState());
+    stateMachine.add(GameStateName.Victory, new VictoryState());
+    stateMachine.add(GameStateName.Play, new PlayState());
+    // Set TitleScreen as the initial state (not the last one added)
+    stateMachine.change(GameStateName.TitleScreen);
 } catch (error) {
-	console.error('Error initializing states:', error);
-	// Continue anyway - at least TitleScreen should work
+    console.error("Error initializing states:", error);
+    // Continue anyway - at least TitleScreen should work
 }
 
 // Create game instance but don't start it yet
 const game = new Game(
-	stateMachine,
-	context,
-	timer,
-	canvas.width,
-	canvas.height
+    stateMachine,
+    context,
+    timer,
+    canvas.width,
+    canvas.height
 );
 
 // Expose game loop starter for instructions screen
-window.startGameLoop = function() {
-	if (!game.isRunning) {
-		game.start();
-	}
+window.startGameLoop = function () {
+    if (!game.isRunning) {
+        game.start();
+    }
 };
 
 // Function to start the game (called from title screen buttons)
-window.startGame = function() {
-	// Import SaveManager and cutscene data
-	Promise.all([
-		import('./services/SaveManager.js'),
-		import('./data/cutscenes.js')
-	]).then(([{ default: SaveManager }, { cutsceneData }]) => {
-		
-		// Check if this is a new game or continue
-		if (window.isNewGame) {
-			// New game: start with opening cutscene
-			const openingCutscene = cutsceneData.opening;
-			stateMachine.change(GameStateName.Cutscene, {
-				cutsceneData: {
-					image: images.get(openingCutscene.id),
-					dialogue: openingCutscene.dialogue
-				},
-				nextState: GameStateName.Play,
-				nextStateParams: {}
-			});
-		} else {
-			// Continue: load saved game
-			const saveData = SaveManager.loadGame();
-			if (saveData) {
-				// Skip cutscenes and load directly into PlayState with saved data
-				stateMachine.change(GameStateName.Play, {
-					loadSave: true,
-					saveData: saveData
-				});
-			} else {
-				// Fallback: no save found, start new game
-				console.error('No save data found, starting new game');
-				const openingCutscene = cutsceneData.opening;
-				stateMachine.change(GameStateName.Cutscene, {
-					cutsceneData: {
-						image: images.get(openingCutscene.id),
-						dialogue: openingCutscene.dialogue
-					},
-					nextState: GameStateName.Play,
-					nextStateParams: {}
-				});
-			}
-		}
-		
-		game.start();
-	});
-	
-	// Focus the canvas so that the player doesn't have to click on it.
-	canvas.focus();
+window.startGame = function () {
+    // Import SaveManager and cutscene data
+    Promise.all([
+        import("./services/SaveManager.js"),
+        import("./data/cutscenes.js"),
+    ]).then(([{ default: SaveManager }, { cutsceneData }]) => {
+        // Check if this is a new game or continue
+        if (window.isNewGame) {
+            // New game: start with opening cutscene
+            const openingCutscene = cutsceneData.opening;
+            stateMachine.change(GameStateName.Cutscene, {
+                cutsceneData: {
+                    image: images.get(openingCutscene.id),
+                    dialogue: openingCutscene.dialogue,
+                },
+                nextState: GameStateName.Play,
+                nextStateParams: {},
+            });
+        } else {
+            // Continue: load saved game
+            const saveData = SaveManager.loadGame();
+            if (saveData) {
+                // Skip cutscenes and load directly into PlayState with saved data
+                stateMachine.change(GameStateName.Play, {
+                    loadSave: true,
+                    saveData: saveData,
+                });
+            } else {
+                // Fallback: no save found, start new game
+                console.error("No save data found, starting new game");
+                const openingCutscene = cutsceneData.opening;
+                stateMachine.change(GameStateName.Cutscene, {
+                    cutsceneData: {
+                        image: images.get(openingCutscene.id),
+                        dialogue: openingCutscene.dialogue,
+                    },
+                    nextState: GameStateName.Play,
+                    nextStateParams: {},
+                });
+            }
+        }
+
+        game.start();
+    });
+
+    // Focus the canvas so that the player doesn't have to click on it.
+    canvas.focus();
 };
 
 // Notify that assets are loaded (this MUST run for Enter key to work)
-console.log('main.js: Assets loaded, calling onAssetsLoaded');
 if (window.onAssetsLoaded) {
-	window.onAssetsLoaded();
+    window.onAssetsLoaded();
 } else {
-	console.error('window.onAssetsLoaded is not defined!');
+    console.error("window.onAssetsLoaded is not defined!");
 }
 
 // Function to start background music (called after user interaction)
-window.startBackgroundMusic = function() {
-	sounds.play('background-music');
+window.startBackgroundMusic = function () {
+    sounds.play("background-music");
 };
 
 // Function to play menu navigation sound
-window.playMenuNavigate = function() {
-	sounds.play('menu-navigate');
+window.playMenuNavigate = function () {
+    sounds.play("menu-navigate");
 };

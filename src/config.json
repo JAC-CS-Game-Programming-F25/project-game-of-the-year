@@ -1,59 +1,59 @@
 {
     "images": [
-	{
-		"name": "cutscene-0",
-		"path": "./assets/images/ui/Cutscene0.png",
-		"width": 0,
-		"height": 0
-	},
-	{
-		"name": "cutscene-1",
-		"path": "./assets/images/ui/Cutscene1.png",
-		"width": 0,
-		"height": 0
-	},
-	{
-		"name": "cutscene-2",
-		"path": "./assets/images/ui/Cutscene2.png",
-		"width": 0,
-		"height": 0
-	},
-	{
-		"name": "cutscene-3",
-		"path": "./assets/images/ui/Cutscene3.png",
-		"width": 0,
-		"height": 0
-	},
-	{
-		"name": "cutscene-4",
-		"path": "./assets/images/ui/Cutscene4.png",
-		"width": 0,
-		"height": 0
-	},
-	{
-		"name": "cutscene-5",
-		"path": "./assets/images/ui/Cutscene5.png",
-		"width": 0,
-		"height": 0
-	},
-	{
-		"name": "post-victory-cutscene",
-		"path": "./assets/images/ui/PostVictoryCutScene.png",
-		"width": 0,
-		"height": 0
-	},
-	{
-		"name": "victory-scene",
-		"path": "./assets/images/ui/VictoryScene.png",
-		"width": 0,
-		"height": 0
-	},
-	{
-		"name": "game-over-bg",
-		"path": "./assets/images/ui/GameOverImage.png",
-		"width": 0,
-		"height": 0
-	},
+        {
+            "name": "cutscene-0",
+            "path": "./assets/images/ui/Cutscene0.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "cutscene-1",
+            "path": "./assets/images/ui/Cutscene1.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "cutscene-2",
+            "path": "./assets/images/ui/Cutscene2.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "cutscene-3",
+            "path": "./assets/images/ui/Cutscene3.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "cutscene-4",
+            "path": "./assets/images/ui/Cutscene4.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "cutscene-5",
+            "path": "./assets/images/ui/Cutscene5.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "post-victory-cutscene",
+            "path": "./assets/images/ui/PostVictoryCutScene.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "victory-scene",
+            "path": "./assets/images/ui/VictoryScene.png",
+            "width": 0,
+            "height": 0
+        },
+        {
+            "name": "game-over-bg",
+            "path": "./assets/images/ui/GameOverImage.png",
+            "width": 0,
+            "height": 0
+        },
         {
             "name": "ground-rocks",
             "path": "./assets/Sprites/Free-Undead-Tileset-Top-Down-Pixel-Art/PNG/Ground_rocks.png",
@@ -299,10 +299,101 @@
             "loop": true
         },
         {
+            "name": "boss-music",
+            "path": "./assets/sounds/BossMusic.mp3",
+            "size": 1,
+            "volume": 0.6,
+            "loop": true
+        },
+        {
             "name": "menu-navigate",
             "path": "./assets/sounds/menu-navigate.wav",
             "size": 3,
             "volume": 0.7,
+            "loop": false
+        },
+        {
+            "name": "bat-attack",
+            "path": "./assets/sounds/BatAttackNoise.wav",
+            "size": 3,
+            "volume": 0.6,
+            "loop": false
+        },
+        {
+            "name": "player-attack",
+            "path": "./assets/sounds/MainCharacterAttack.wav",
+            "size": 3,
+            "volume": 0.5,
+            "loop": false
+        },
+        {
+            "name": "spirit-boxer-attack1",
+            "path": "./assets/sounds/SpiritBoxerAttack1.wav",
+            "size": 3,
+            "volume": 0.6,
+            "loop": false
+        },
+        {
+            "name": "spirit-boxer-attack2",
+            "path": "./assets/sounds/SpiritBoxerAttack2.wav",
+            "size": 3,
+            "volume": 0.7,
+            "loop": false
+        },
+        {
+            "name": "player-hit",
+            "path": "./assets/sounds/CharacterGettingHit.wav",
+            "size": 3,
+            "volume": 0.6,
+            "loop": false
+        },
+        {
+            "name": "player-death",
+            "path": "./assets/sounds/MainCharDeath.wav",
+            "size": 3,
+            "volume": 0.7,
+            "loop": false
+        },
+        {
+            "name": "boss-hit",
+            "path": "./assets/sounds/BossTakingDmg.wav",
+            "size": 3,
+            "volume": 0.6,
+            "loop": false
+        },
+        {
+            "name": "boss-death",
+            "path": "./assets/sounds/BossDeathSound.wav",
+            "size": 3,
+            "volume": 0.8,
+            "loop": false
+        },
+        {
+            "name": "boss-special",
+            "path": "./assets/sounds/BossSpecialAttack.wav",
+            "size": 3,
+            "volume": 0.8,
+            "loop": false
+        },
+        {
+            "name": "boss-attack1",
+            "path": "./assets/sounds/GuardianAtk1.wav",
+            "size": 3,
+            "volume": 0.7,
+            "loop": false
+        },
+        {
+            "name": "boss-attack2",
+            "path": "./assets/sounds/GuardianAtk2.wav",
+            "size": 3,
+            "volume": 0.8,
+            "loop": false
+        },
+        {
+            "name": "enemy-death",
+            "path": "./assets/sounds/EnemyDeath.wav",
+            "size": 3,
+            "volume": 0.6,
             "loop": false
         }
     ]

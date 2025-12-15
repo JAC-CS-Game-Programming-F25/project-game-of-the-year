@@ -11,7 +11,6 @@ export default class InstructionsState extends State {
 	enter() {
 		this.escapePressed = false;
 		this.spacePressed = false;
-		console.log('Instructions screen opened');
 	}
 
 	update(dt) {

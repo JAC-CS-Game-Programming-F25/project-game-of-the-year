@@ -1,5 +1,6 @@
 import State from '../../../../lib/State.js';
 import GameStateName from '../../../enums/GameStateName.js';
+import { sounds } from '../../../globals.js';
 
 /**
  * Player DYING state.
@@ -20,7 +21,8 @@ export default class PlayerDyingState extends State {
 		// Set death animation
 		player.setAnimation('death');
 		
-		console.log('PlayerDyingState: Player is dying');
+		// Play death sound
+		sounds.play('player-death');
 	}
 
 	exit() {
@@ -34,7 +36,6 @@ export default class PlayerDyingState extends State {
 		// Death animation complete
 		if (this.deathTimer >= this.deathAnimationDuration) {
 			player.readyForGameOver = true;
-			console.log('PlayerDyingState: Death animation complete, ready for GameOver');
 		}
 	}
 

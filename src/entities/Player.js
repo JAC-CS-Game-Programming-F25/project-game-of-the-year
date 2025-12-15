@@ -3,6 +3,7 @@ import PlayerStateMachine from './PlayerStateMachine.js';
 import Direction from '../enums/Direction.js';
 import Input from '../../lib/Input.js';
 import Animation from '../../lib/Animation.js';
+import { sounds } from '../globals.js';
 
 /**
  * Player entity (Shadow Creature).
@@ -64,7 +65,6 @@ export default class Player extends Entity {
 		
 		// Initialize state machine
 		this.stateMachine = new PlayerStateMachine(this);
-		console.log('Player: State machine initialized, current state:', this.stateMachine.currentState?.name);
 	}
 
 	update(dt, input, images) {
@@ -124,9 +124,8 @@ export default class Player extends Entity {
 	setAnimation(animation) {
 		if (this.currentAnimation !== animation) {
 			this.currentAnimation = animation;
-			this.currentFrame = 0; // Reset to first frame
+			this.currentFrame = 0;
 			this.frameTime = 0;
-			console.log('Player: Animation changed to', animation);
 		}
 	}
 	
@@ -250,7 +249,8 @@ export default class Player extends Entity {
 		// Set invincibility timer
 		this.invincibilityTimer = this.invincibilityDuration;
 		
-		// TODO: Play hit sound effect here
+		// Play hit sound
+		sounds.play('player-hit');
 		
 		// Quick vanish flash (HIT state) unless attacking or dying
 		if (this.isAlive() && !isAttacking && this.stateMachine.currentState?.name !== 'dying') {

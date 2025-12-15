@@ -3,3 +3,8 @@ node_modules/
 .DS_Store
 documents/
 assets/sounds/background-music.mp3
+
+# Keep only README.md, ignore other md files
+CODEBASE_LEARNING_GUIDE.md
+REMAINING_WORK.md
+TASK_PLAN.md
