@@ -10,6 +10,14 @@ export default class Camera {
 		this.height = height;
 		this.target = null;
 		this.bounds = null;
+		
+		this.shake = {
+			x: 0,
+			y: 0,
+			intensity: 0,
+			duration: 0,
+			timer: 0
+		};
 	}
 
 	/**
@@ -38,6 +46,15 @@ export default class Camera {
 	}
 
 	/**
+	 * Trigger camera shake effect
+	 */
+	triggerShake(intensity, duration) {
+		this.shake.intensity = intensity;
+		this.shake.duration = duration;
+		this.shake.timer = 0;
+	}
+
+	/**
 	 * Update camera position to follow target
 	 */
 	update(dt) {
@@ -63,17 +80,30 @@ export default class Camera {
 			this.position.x = targetX;
 			this.position.y = targetY;
 		}
+
+		// Update camera shake
+		if (this.shake.timer < this.shake.duration) {
+			this.shake.timer += dt;
+			const progress = this.shake.timer / this.shake.duration;
+			const currentIntensity = this.shake.intensity * (1 - progress);
+			
+			this.shake.x = (Math.random() - 0.5) * currentIntensity;
+			this.shake.y = (Math.random() - 0.5) * currentIntensity;
+		} else {
+			this.shake.x = 0;
+			this.shake.y = 0;
+		}
 	}
 
 	/**
-	 * Get camera position
+	 * Get camera position (including shake)
 	 */
 	get x() {
-		return this.position.x;
+		return this.position.x + this.shake.x;
 	}
 
 	get y() {
-		return this.position.y;
+		return this.position.y + this.shake.y;
 	}
 }
 

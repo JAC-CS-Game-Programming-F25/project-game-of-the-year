@@ -4,13 +4,15 @@ import Camera from "../systems/Camera.js";
 import MapManager from "../systems/MapManager.js";
 import CollisionManager from "../systems/CollisionManager.js";
 import SaveManager from "../services/SaveManager.js";
+import ParticleSystem from "../effects/ParticleSystem.js";
 import Player from "../entities/Player.js";
 import Direction from "../enums/Direction.js";
 import Factory from "../services/Factory.js";
 import EnemyType from "../enums/EnemyType.js";
 import GameStateName from "../enums/GameStateName.js";
-import { images, input, CANVAS_WIDTH, CANVAS_HEIGHT, canvas, stateMachine } from "../globals.js";
+import { images, input, CANVAS_WIDTH, CANVAS_HEIGHT, canvas, stateMachine, timer, sounds } from "../globals.js";
 import Input from "../../lib/Input.js";
+import Easing from "../../lib/Easing.js";
 
 export default class PlayState extends State {
 	constructor() {
@@ -21,9 +23,16 @@ export default class PlayState extends State {
 		this.enemies = [];
 		this.collisionManager = new CollisionManager();
 		this.mapManager = new MapManager();
+		this.particleSystem = new ParticleSystem();
 		this.isTransitioning = false;
-		this.transitionCooldown = 0; // Prevent immediate re-trigger
-		this.escapePressed = false; // For pause menu
+		this.transitionCooldown = 0;
+		this.escapePressed = false;
+		this.screenFade = {
+			alpha: 0,
+			isFading: false
+		};
+		this.bossMusicPlaying = false;
+		this.enemiesKilled = 0;
 	}
 
 	async enter(params = {}) {
@@ -33,6 +42,8 @@ export default class PlayState extends State {
 		// If loading from save
 		if (params.loadSave && params.saveData) {
 			await this.loadFromSave(params.saveData);
+			this.screenFade.alpha = 1.0;
+			timer.tween(this.screenFade, { alpha: 0 }, 0.5, Easing.easeOutQuad);
 			return;
 		}
 		
@@ -47,6 +58,10 @@ export default class PlayState extends State {
 		}
 		
 		await this.loadCurrentMap();
+		
+		// Fade in from black after cutscene
+		this.screenFade.alpha = 1.0;
+		timer.tween(this.screenFade, { alpha: 0 }, 0.5, Easing.easeOutQuad);
 	}
 
 	/**
@@ -54,8 +69,6 @@ export default class PlayState extends State {
 	 */
 	async loadFromSave(saveData) {
 		try {
-			console.log('Loading game from save:', saveData);
-			
 			// Set map manager to the saved map
 			const mapIndex = this.mapManager.maps.findIndex(m => m.path === saveData.currentMap);
 			if (mapIndex >= 0) {
@@ -86,6 +99,9 @@ export default class PlayState extends State {
 			this.player.maxHp = saveData.player.maxHp;
 			this.player.direction = saveData.player.direction;
 			
+			// Restore enemies killed counter
+			this.enemiesKilled = saveData.enemiesKilled || 0;
+			
 			// Set camera to follow player
 			this.camera.setTarget(this.player);
 			
@@ -108,12 +124,11 @@ export default class PlayState extends State {
 						enemy.hp = enemyData.hp;
 						enemy.maxHp = enemyData.maxHp;
 						enemy.target = this.player;
+						enemy.camera = this.camera;
+						enemy.particleSystem = this.particleSystem;
 						this.enemies.push(enemy);
 					}
 				}
-				console.log(`Restored ${this.enemies.length} enemies from save`);
-			} else {
-				console.log('No enemies in save data');
 			}
 			
 			// Initialize collision manager
@@ -122,8 +137,6 @@ export default class PlayState extends State {
 			}
 			this.collisionManager.setPlayer(this.player);
 			this.collisionManager.setEnemies(this.enemies);
-			
-			console.log('Game loaded successfully');
 		} catch (error) {
 			console.error('Error loading from save:', error);
 			// Fallback to normal map load
@@ -145,16 +158,15 @@ export default class PlayState extends State {
 				player: this.player,
 				currentMap: this.mapManager.getCurrentMap().path,
 				mapProgress: this.mapManager.currentMapIndex,
-				enemies: this.enemies, // Save current enemy states
+				enemies: this.enemies,
+				enemiesKilled: this.enemiesKilled,
 				flags: {
 					// Add any game flags here (e.g., bossDefeated)
 				}
 			};
 			
 			const success = SaveManager.saveGame(gameState);
-			if (success) {
-				console.log('Game saved successfully');
-			} else {
+			if (!success) {
 				console.error('SaveManager.saveGame returned false');
 			}
 			return success;
@@ -345,6 +357,8 @@ export default class PlayState extends State {
 		// Set player as target for all spawned enemies
 		for (const enemy of spawned) {
 			enemy.target = this.player;
+			enemy.camera = this.camera;
+			enemy.particleSystem = this.particleSystem;
 		}
 		
 		this.enemies.push(...spawned);
@@ -385,16 +399,48 @@ export default class PlayState extends State {
 			enemy.update(dt);
 		}
 
+		// Check for living Temple Guardian to trigger boss music
+		const hasLivingBoss = this.enemies.some(e => 
+			e.constructor.name === 'TempleGuardian' && e.isAlive()
+		);
+		
+		if (hasLivingBoss && !this.bossMusicPlaying) {
+			// Start boss music
+			sounds.stop('background-music');
+			sounds.play('boss-music');
+			
+			// Skip first 10 seconds of silence
+			const bossMusicPool = sounds.get('boss-music');
+			if (bossMusicPool && bossMusicPool.pool[0]) {
+				setTimeout(() => {
+					bossMusicPool.pool[0].currentTime = 10;
+				}, 50);
+			}
+			
+			this.bossMusicPlaying = true;
+		}
+
 		// Check if Temple Guardian is about to be removed (victory condition)
 		const bossDefeated = this.enemies.some(e => 
 			e.constructor.name === 'TempleGuardian' && e.readyForRemoval
 		);
+		
+		// Count enemies killed before removing them
+		const enemiesKilledThisFrame = this.enemies.filter(e => e.readyForRemoval).length;
+		this.enemiesKilled += enemiesKilledThisFrame;
 		
 		// Remove dead enemies
 		this.enemies = this.enemies.filter(enemy => !enemy.readyForRemoval);
 		
 		// Trigger victory cutscene if boss was defeated
 		if (bossDefeated) {
+			// Stop boss music and resume background music
+			if (this.bossMusicPlaying) {
+				sounds.stop('boss-music');
+				sounds.play('background-music');
+				this.bossMusicPlaying = false;
+			}
+			
 			this.triggerVictoryCutscenes();
 			return;
 		}
@@ -408,6 +454,13 @@ export default class PlayState extends State {
 		// Check if player died
 		if (this.player && !this.player.isAlive() && this.player.stateMachine.currentState.name !== 'dying') {
 			this.player.stateMachine.change('dying');
+			
+			// Stop boss music if playing
+			if (this.bossMusicPlaying) {
+				sounds.stop('boss-music');
+				sounds.play('background-music');
+				this.bossMusicPlaying = false;
+			}
 		}
 		
 		// Check if player death animation complete (transition to GameOver)
@@ -424,6 +477,11 @@ export default class PlayState extends State {
 		// Check for exit collisions (map transitions)
 		if (!this.isTransitioning && this.transitionCooldown <= 0 && this.player && this.map && this.map.loaded) {
 			this.checkExitCollisions();
+		}
+
+		// Update particle system
+		if (this.particleSystem) {
+			this.particleSystem.update(dt);
 		}
 
 		// Update camera
@@ -503,11 +561,24 @@ export default class PlayState extends State {
 			context.restore();
 		}
 
+		// Render particles (with camera offset)
+		if (this.particleSystem) {
+			this.particleSystem.render(context, this.camera);
+		}
+
 		// Restore context
 		context.restore();
 		
 		// Render HUD (no camera offset)
 		this.renderHUD(context);
+
+		// Render screen fade overlay (for transitions)
+		if (this.screenFade.alpha > 0) {
+			context.save();
+			context.fillStyle = `rgba(0, 0, 0, ${this.screenFade.alpha})`;
+			context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+			context.restore();
+		}
 	}
 	
 	/**
@@ -545,6 +616,12 @@ export default class PlayState extends State {
 		context.font = '14px Arial';
 		context.textAlign = 'left';
 		context.fillText(`HP: ${Math.ceil(this.player.hp)} / ${this.player.maxHp}`, barX + 5, barY + barHeight + 15);
+		
+		// Enemies Killed Counter (top-right corner)
+		context.fillStyle = '#ffffff';
+		context.font = 'bold 18px Arial';
+		context.textAlign = 'right';
+		context.fillText(`Enemies Defeated: ${this.enemiesKilled}`, CANVAS_WIDTH - 20, 30);
 		
 		// Boss Health Bar (Temple Guardian)
 		const boss = this.enemies.find(e => e.constructor.name === 'TempleGuardian' && e.isAlive());
@@ -632,9 +709,7 @@ export default class PlayState extends State {
 		
 		// Get the current map index before advancing
 		const currentMapIndex = this.mapManager.currentMapIndex;
-		console.log('Transitioning from map index:', currentMapIndex);
 		const nextMap = this.mapManager.goToNextMap();
-		console.log('Next map:', nextMap);
 		
 		if (nextMap) {
 			// Get cutscene for the map we just completed
@@ -649,11 +724,7 @@ export default class PlayState extends State {
 				case 4: cutscene = cutsceneData.beforeBoss; break;
 			}
 			
-			console.log('Cutscene for map', currentMapIndex, ':', cutscene);
-			
 			if (cutscene) {
-				// Show cutscene, then load next map when it finishes
-				console.log('Showing cutscene...');
 				stateMachine.change(GameStateName.Cutscene, {
 					cutsceneData: {
 						image: images.get(cutscene.id),
@@ -663,9 +734,14 @@ export default class PlayState extends State {
 					nextStateParams: {}
 				});
 			} else {
-				// No cutscene for this transition, load map directly
-				console.log('No cutscene, loading map directly...');
+				// No cutscene for this transition, load map with fade
+				this.screenFade.isFading = true;
+				await timer.tweenAsync(this.screenFade, { alpha: 1.0 }, 0.5, Easing.easeInQuad);
+				
 				await this.loadCurrentMap();
+				
+				await timer.tweenAsync(this.screenFade, { alpha: 0 }, 0.5, Easing.easeOutQuad);
+				this.screenFade.isFading = false;
 			}
 		} else {
 			// No more maps, victory!

@@ -1,4 +1,5 @@
 import State from '../../../../lib/State.js';
+import { sounds } from '../../../globals.js';
 
 /**
  * Enemy DYING state - death animation, then removal.
@@ -21,8 +22,10 @@ export default class EnemyDyingState extends State {
 		
 		if (enemy.constructor.name === 'TempleGuardian') {
 			this.deathAnimationDuration = 10.0;
+			sounds.play('boss-death');
 		} else {
 			this.deathAnimationDuration = 1.0;
+			sounds.play('enemy-death');
 		}
 		
 		// Mark enemy as dead (for removal by PlayState)

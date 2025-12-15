@@ -11,8 +11,8 @@ export default class Entity extends GameObject {
 		super(x, y, width, height);
 		
 		// Health system
-		this.hp = 100;
-		this.maxHp = 100;
+		this.hp = 150;
+		this.maxHp = 150;
 		
 		// Collision detection
 		this.hitbox = new Hitbox(x, y, width, height);

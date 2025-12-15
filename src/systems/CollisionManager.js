@@ -1,3 +1,5 @@
+import { sounds } from '../globals.js';
+
 /**
  * CollisionManager - Handles all combat collision detection.
  * Checks player attacks vs enemies, enemy attacks vs player.
@@ -92,6 +94,14 @@ export default class CollisionManager {
 					enemy.takeDamage(this.player.attackDamage);
 					this.player.hasDealtDamage = true;
 
+					// Play player attack sound
+					sounds.play('player-attack');
+					
+					// Play enemy hit sound
+					if (enemy.constructor.name === 'TempleGuardian') {
+						sounds.play('boss-hit');
+					}
+
 					if (distance > 0) {
 						const knockbackStrength = 20;
 						const knockbackX = (dx / distance) * knockbackStrength;
@@ -185,6 +195,31 @@ export default class CollisionManager {
 				const damage = enemy.getDamage ? enemy.getDamage() : (enemy.attackDamage || enemy.damage || 5);
 				this.player.takeDamage(damage);
 				attackState.hasDealtDamage = true;
+
+				// Play attack sound
+				if (enemy.constructor.name === 'ShadowBat') {
+					sounds.play('bat-attack');
+				} else if (enemy.constructor.name === 'SpiritBoxer') {
+					// Play different sounds based on combo attack
+					if (enemy.currentComboAttack === 1) {
+						sounds.play('spirit-boxer-attack1');
+					} else {
+						sounds.play('spirit-boxer-attack2');
+					}
+				} else if (enemy.constructor.name === 'TempleGuardian') {
+					// Play different sounds based on attack type
+					if (enemy.currentAttackType === 'attack1') {
+						sounds.play('boss-attack1');
+					} else if (enemy.currentAttackType === 'attack2') {
+						sounds.play('boss-attack2');
+					}
+				}
+
+				// Trigger camera shake on Temple Guardian attacks
+				if (enemy.constructor.name === 'TempleGuardian' && enemy.camera) {
+					const shakeIntensity = enemy.currentAttackType === 'attack2' ? 15 : 8;
+					enemy.camera.triggerShake(shakeIntensity, 0.3);
+				}
 
 				if (!this.player.isAlive()) {
 					this.player.stateMachine.change('dying');

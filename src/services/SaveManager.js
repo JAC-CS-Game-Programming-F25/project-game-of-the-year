@@ -47,7 +47,6 @@ export default class SaveManager {
 			};
 
 			localStorage.setItem(SaveManager.SAVE_KEY, JSON.stringify(saveData));
-			console.log('Game saved successfully:', saveData);
 			return true;
 		} catch (error) {
 			console.error('Failed to save game:', error);
@@ -63,12 +62,10 @@ export default class SaveManager {
 		try {
 			const data = localStorage.getItem(SaveManager.SAVE_KEY);
 			if (!data) {
-				console.log('No save file found');
 				return null;
 			}
 
 			const saveData = JSON.parse(data);
-			console.log('Game loaded successfully:', saveData);
 			return saveData;
 		} catch (error) {
 			console.error('Failed to load game:', error);
@@ -82,7 +79,6 @@ export default class SaveManager {
 	static deleteSave() {
 		try {
 			localStorage.removeItem(SaveManager.SAVE_KEY);
-			console.log('Save file deleted');
 			return true;
 		} catch (error) {
 			console.error('Failed to delete save:', error);
